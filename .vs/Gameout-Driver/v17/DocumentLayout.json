@@ -1,0 +1,41 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\victo\\source\\repos\\Gameout-Driver\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{0EE3A7B4-95C0-4239-8F18-FCC93031BC98}|Gameout-Driver\\Gameout-Driver.csproj|c:\\users\\victo\\source\\repos\\gameout-driver\\gameout-driver\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0EE3A7B4-95C0-4239-8F18-FCC93031BC98}|Gameout-Driver\\Gameout-Driver.csproj|solutionrelative:gameout-driver\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\victo\\source\\repos\\Gameout-Driver\\Gameout-Driver\\Program.cs",
+              "RelativeDocumentMoniker": "Gameout-Driver\\Program.cs",
+              "ToolTip": "C:\\Users\\victo\\source\\repos\\Gameout-Driver\\Gameout-Driver\\Program.cs",
+              "RelativeToolTip": "Gameout-Driver\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAABbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T01:07:41.621Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
