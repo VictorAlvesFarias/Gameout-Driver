@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\victo\\source\\repos\\Gameout-Driver\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj": {}
+    "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Driver\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj": {}
   },
   "projects": {
-    "C:\\Users\\victo\\source\\repos\\Gameout-Driver\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj": {
+    "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Driver\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\victo\\source\\repos\\Gameout-Driver\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj",
+        "projectUniqueName": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Driver\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj",
         "projectName": "Packages.Entity.Domain",
-        "projectPath": "C:\\Users\\victo\\source\\repos\\Gameout-Driver\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj",
+        "projectPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Driver\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj",
         "packagesPath": "C:\\Users\\victo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\victo\\source\\repos\\Gameout-Driver\\Packages.Entity.Domain\\obj\\",
+        "outputPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Driver\\Packages.Entity.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -45,7 +45,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.200"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net6.0": {
@@ -66,7 +66,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306\\RuntimeIdentifierGraph.json"
         }
       }
     }

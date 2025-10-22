@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "6DwZ4mx4D1I=",
-  "success": false,
-  "projectFilePath": "C:\\Users\\victo\\source\\repos\\Gameout-Driver\\Domain\\Domain.csproj",
+  "dgSpecHash": "FvS32JfPEuE=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Driver\\Domain\\Domain.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\victo\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\victo\\.nuget\\packages\\microsoft.aspnetcore.cryptography.internal\\6.0.36\\microsoft.aspnetcore.cryptography.internal.6.0.36.nupkg.sha512",
@@ -27,15 +27,5 @@
     "C:\\Users\\victo\\.nuget\\packages\\system.collections.immutable\\6.0.1\\system.collections.immutable.6.0.1.nupkg.sha512",
     "C:\\Users\\victo\\.nuget\\packages\\system.diagnostics.diagnosticsource\\6.0.2\\system.diagnostics.diagnosticsource.6.0.2.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "NU1104",
-      "level": "Error",
-      "message": "Não é possível encontrar o projeto 'C:\\Users\\victo\\source\\repos\\Gameout-Driver\\Packages.Helpers.Domain\\Packages.Helpers.Domain.csproj'. Verifique se a referência do projeto é válida e se o arquivo de projeto existe.",
-      "libraryId": "C:\\Users\\victo\\source\\repos\\Gameout-Driver\\Packages.Helpers.Domain\\Packages.Helpers.Domain.csproj",
-      "targetGraphs": [
-        "net6.0"
-      ]
-    }
-  ]
+  "logs": []
 }
