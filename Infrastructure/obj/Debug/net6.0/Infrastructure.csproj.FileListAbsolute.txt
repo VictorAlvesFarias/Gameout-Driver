@@ -134,3 +134,27 @@ C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Infrastructure\obj\Debug\net6
 C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Infrastructure\obj\Debug\net6.0\Infrastructure.pdb
 C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Infrastructure\obj\Debug\net6.0\Infrastructure.genruntimeconfig.cache
 C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Infrastructure\obj\Debug\net6.0\ref\Infrastructure.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\bin\Debug\net6.0\Infrastructure.deps.json
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\bin\Debug\net6.0\Infrastructure.runtimeconfig.json
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\bin\Debug\net6.0\Infrastructure.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\bin\Debug\net6.0\Infrastructure.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\bin\Debug\net6.0\Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\bin\Debug\net6.0\Packages.Entity.Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\bin\Debug\net6.0\Packages.Helpers.Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\bin\Debug\net6.0\Packages.Identity.Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\bin\Debug\net6.0\Domain.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\bin\Debug\net6.0\Packages.Entity.Domain.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\bin\Debug\net6.0\Packages.Helpers.Domain.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\bin\Debug\net6.0\Packages.Identity.Domain.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\obj\Debug\net6.0\Infrastructure.csproj.AssemblyReference.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\obj\Debug\net6.0\Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\obj\Debug\net6.0\Infrastructure.AssemblyInfoInputs.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\obj\Debug\net6.0\Infrastructure.AssemblyInfo.cs
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\obj\Debug\net6.0\Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\obj\Debug\net6.0\Infrastructure.sourcelink.json
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\obj\Debug\net6.0\Infrastr.15EFFBFE.Up2Date
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\obj\Debug\net6.0\Infrastructure.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\obj\Debug\net6.0\refint\Infrastructure.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\obj\Debug\net6.0\Infrastructure.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\obj\Debug\net6.0\Infrastructure.genruntimeconfig.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Infrastructure\obj\Debug\net6.0\ref\Infrastructure.dll

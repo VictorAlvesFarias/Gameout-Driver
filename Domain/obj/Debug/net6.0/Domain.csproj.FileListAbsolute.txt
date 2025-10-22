@@ -113,3 +113,25 @@ C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\obj\Debug\net6.0\refin
 C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.pdb
 C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.genruntimeconfig.cache
 C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\obj\Debug\net6.0\ref\Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Domain.deps.json
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Domain.runtimeconfig.json
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Domain.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Packages.Entity.Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Packages.Helpers.Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Packages.Identity.Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Packages.Entity.Domain.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Packages.Helpers.Domain.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Packages.Identity.Domain.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.csproj.AssemblyReference.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.AssemblyInfoInputs.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.AssemblyInfo.cs
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.csproj.CoreCompileInputs.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.sourcelink.json
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.csproj.Up2Date
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\refint\Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.genruntimeconfig.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\ref\Domain.dll

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "FvS32JfPEuE=",
+  "dgSpecHash": "ma8fV6Owz90=",
   "success": true,
-  "projectFilePath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Driver\\Domain\\Domain.csproj",
+  "projectFilePath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Driver\\Domain\\Domain.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\victo\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\victo\\.nuget\\packages\\microsoft.aspnetcore.cryptography.internal\\6.0.36\\microsoft.aspnetcore.cryptography.internal.6.0.36.nupkg.sha512",

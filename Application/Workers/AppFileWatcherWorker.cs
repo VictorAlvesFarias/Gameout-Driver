@@ -24,7 +24,7 @@ namespace Application.Workers
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var webSocketClientWorker = _serviceProvider.GetRequiredService<WebSocketClientWorker>();
-            var appFileWatcherService = _serviceProvider.GetRequiredService<IAppFileWatcherService>();
+            var appFileWatcherService = _serviceProvider.GetRequiredService<AppFileWatcherService>();
 
             webSocketClientWorker.Subscribe("SetEvents", async (message, cancellationToken) =>
             {

@@ -1541,11 +1541,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Driver\\Packages.WebSocket.Application\\Packages.Ws.Application.csproj",
+      "projectUniqueName": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Driver\\Packages.WebSocket.Application\\Packages.Ws.Application.csproj",
       "projectName": "Packages.Ws.Application",
-      "projectPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Driver\\Packages.WebSocket.Application\\Packages.Ws.Application.csproj",
+      "projectPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Driver\\Packages.WebSocket.Application\\Packages.Ws.Application.csproj",
       "packagesPath": "C:\\Users\\victo\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Driver\\Packages.WebSocket.Application\\obj\\",
+      "outputPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Driver\\Packages.WebSocket.Application\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -1579,7 +1579,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.300"
+      "SdkAnalysisLevel": "9.0.200"
     },
     "frameworks": {
       "net6.0": {
@@ -1606,7 +1606,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200\\RuntimeIdentifierGraph.json"
       }
     }
   }

@@ -21,3 +21,15 @@ C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.Entity.Domain\obj\De
 C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.Entity.Domain\obj\Debug\net6.0\refint\Packages.Entity.Domain.dll
 C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.Entity.Domain\obj\Debug\net6.0\Packages.Entity.Domain.pdb
 C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.Entity.Domain\obj\Debug\net6.0\ref\Packages.Entity.Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Entity.Domain\bin\Debug\net6.0\Packages.Entity.Domain.deps.json
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Entity.Domain\bin\Debug\net6.0\Packages.Entity.Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Entity.Domain\bin\Debug\net6.0\Packages.Entity.Domain.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Entity.Domain\obj\Debug\net6.0\Packages.Entity.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Entity.Domain\obj\Debug\net6.0\Packages.Entity.Domain.AssemblyInfoInputs.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Entity.Domain\obj\Debug\net6.0\Packages.Entity.Domain.AssemblyInfo.cs
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Entity.Domain\obj\Debug\net6.0\Packages.Entity.Domain.csproj.CoreCompileInputs.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Entity.Domain\obj\Debug\net6.0\Packages.Entity.Domain.sourcelink.json
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Entity.Domain\obj\Debug\net6.0\Packages.Entity.Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Entity.Domain\obj\Debug\net6.0\refint\Packages.Entity.Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Entity.Domain\obj\Debug\net6.0\Packages.Entity.Domain.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Entity.Domain\obj\Debug\net6.0\ref\Packages.Entity.Domain.dll
