@@ -1,0 +1,46 @@
+C:\Users\victo\source\repos\ConsoleApp3\Packages.Helpers.Domain\bin\Debug\net6.0\Packages.Helpers.Domain.deps.json
+C:\Users\victo\source\repos\ConsoleApp3\Packages.Helpers.Domain\bin\Debug\net6.0\Packages.Helpers.Domain.dll
+C:\Users\victo\source\repos\ConsoleApp3\Packages.Helpers.Domain\bin\Debug\net6.0\Packages.Helpers.Domain.pdb
+C:\Users\victo\source\repos\ConsoleApp3\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\source\repos\ConsoleApp3\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.AssemblyInfoInputs.cache
+C:\Users\victo\source\repos\ConsoleApp3\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.AssemblyInfo.cs
+C:\Users\victo\source\repos\ConsoleApp3\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.csproj.CoreCompileInputs.cache
+C:\Users\victo\source\repos\ConsoleApp3\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.dll
+C:\Users\victo\source\repos\ConsoleApp3\Packages.Helpers.Domain\obj\Debug\net6.0\refint\Packages.Helpers.Domain.dll
+C:\Users\victo\source\repos\ConsoleApp3\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.pdb
+C:\Users\victo\source\repos\ConsoleApp3\Packages.Helpers.Domain\obj\Debug\net6.0\ref\Packages.Helpers.Domain.dll
+C:\Users\victo\source\repos\Gameout-Api\Packages.Helpers.Domain\bin\Debug\net6.0\Packages.Helpers.Domain.deps.json
+C:\Users\victo\source\repos\Gameout-Api\Packages.Helpers.Domain\bin\Debug\net6.0\Packages.Helpers.Domain.dll
+C:\Users\victo\source\repos\Gameout-Api\Packages.Helpers.Domain\bin\Debug\net6.0\Packages.Helpers.Domain.pdb
+C:\Users\victo\source\repos\Gameout-Api\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\source\repos\Gameout-Api\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.AssemblyInfoInputs.cache
+C:\Users\victo\source\repos\Gameout-Api\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.AssemblyInfo.cs
+C:\Users\victo\source\repos\Gameout-Api\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.csproj.CoreCompileInputs.cache
+C:\Users\victo\source\repos\Gameout-Api\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.dll
+C:\Users\victo\source\repos\Gameout-Api\Packages.Helpers.Domain\obj\Debug\net6.0\refint\Packages.Helpers.Domain.dll
+C:\Users\victo\source\repos\Gameout-Api\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.pdb
+C:\Users\victo\source\repos\Gameout-Api\Packages.Helpers.Domain\obj\Debug\net6.0\ref\Packages.Helpers.Domain.dll
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.Helpers.Domain\bin\Debug\net6.0\Packages.Helpers.Domain.deps.json
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.Helpers.Domain\bin\Debug\net6.0\Packages.Helpers.Domain.dll
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.Helpers.Domain\bin\Debug\net6.0\Packages.Helpers.Domain.pdb
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.AssemblyInfoInputs.cache
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.AssemblyInfo.cs
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.csproj.CoreCompileInputs.cache
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.sourcelink.json
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.dll
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.Helpers.Domain\obj\Debug\net6.0\refint\Packages.Helpers.Domain.dll
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.pdb
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.Helpers.Domain\obj\Debug\net6.0\ref\Packages.Helpers.Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Helpers.Domain\bin\Debug\net6.0\Packages.Helpers.Domain.deps.json
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Helpers.Domain\bin\Debug\net6.0\Packages.Helpers.Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Helpers.Domain\bin\Debug\net6.0\Packages.Helpers.Domain.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.AssemblyInfoInputs.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.AssemblyInfo.cs
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.csproj.CoreCompileInputs.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.sourcelink.json
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Helpers.Domain\obj\Debug\net6.0\refint\Packages.Helpers.Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Helpers.Domain\obj\Debug\net6.0\Packages.Helpers.Domain.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.Helpers.Domain\obj\Debug\net6.0\ref\Packages.Helpers.Domain.dll

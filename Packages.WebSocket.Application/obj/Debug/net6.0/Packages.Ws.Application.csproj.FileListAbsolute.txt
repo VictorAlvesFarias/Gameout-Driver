@@ -1,0 +1,38 @@
+C:\Users\victo\source\repos\ConsoleApp3\Packages.WebSocket.Application\bin\Debug\net6.0\Packages.Ws.Application.deps.json
+C:\Users\victo\source\repos\ConsoleApp3\Packages.WebSocket.Application\bin\Debug\net6.0\Packages.Ws.Application.dll
+C:\Users\victo\source\repos\ConsoleApp3\Packages.WebSocket.Application\bin\Debug\net6.0\Packages.Ws.Application.pdb
+C:\Users\victo\source\repos\ConsoleApp3\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.csproj.AssemblyReference.cache
+C:\Users\victo\source\repos\ConsoleApp3\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\source\repos\ConsoleApp3\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.AssemblyInfoInputs.cache
+C:\Users\victo\source\repos\ConsoleApp3\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.AssemblyInfo.cs
+C:\Users\victo\source\repos\ConsoleApp3\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.csproj.CoreCompileInputs.cache
+C:\Users\victo\source\repos\ConsoleApp3\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.dll
+C:\Users\victo\source\repos\ConsoleApp3\Packages.WebSocket.Application\obj\Debug\net6.0\refint\Packages.Ws.Application.dll
+C:\Users\victo\source\repos\ConsoleApp3\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.pdb
+C:\Users\victo\source\repos\ConsoleApp3\Packages.WebSocket.Application\obj\Debug\net6.0\ref\Packages.Ws.Application.dll
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.WebSocket.Application\bin\Debug\net6.0\Packages.Ws.Application.deps.json
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.WebSocket.Application\bin\Debug\net6.0\Packages.Ws.Application.dll
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.WebSocket.Application\bin\Debug\net6.0\Packages.Ws.Application.pdb
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.csproj.AssemblyReference.cache
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.AssemblyInfoInputs.cache
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.AssemblyInfo.cs
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.csproj.CoreCompileInputs.cache
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.sourcelink.json
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.dll
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\refint\Packages.Ws.Application.dll
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.pdb
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\ref\Packages.Ws.Application.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.WebSocket.Application\bin\Debug\net6.0\Packages.Ws.Application.deps.json
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.WebSocket.Application\bin\Debug\net6.0\Packages.Ws.Application.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.WebSocket.Application\bin\Debug\net6.0\Packages.Ws.Application.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.csproj.AssemblyReference.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.AssemblyInfoInputs.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.AssemblyInfo.cs
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.csproj.CoreCompileInputs.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.sourcelink.json
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\refint\Packages.Ws.Application.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\Packages.Ws.Application.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Packages.WebSocket.Application\obj\Debug\net6.0\ref\Packages.Ws.Application.dll

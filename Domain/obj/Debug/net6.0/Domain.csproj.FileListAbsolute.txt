@@ -1,0 +1,137 @@
+C:\Users\victor.alves\Downloads\Code\Backend\Domain\bin\Debug\net6.0\Domain.deps.json
+C:\Users\victor.alves\Downloads\Code\Backend\Domain\bin\Debug\net6.0\Domain.runtimeconfig.json
+C:\Users\victor.alves\Downloads\Code\Backend\Domain\bin\Debug\net6.0\Domain.dll
+C:\Users\victor.alves\Downloads\Code\Backend\Domain\bin\Debug\net6.0\Domain.pdb
+C:\Users\victor.alves\Downloads\Code\Backend\Domain\obj\Debug\net6.0\Domain.csproj.AssemblyReference.cache
+C:\Users\victor.alves\Downloads\Code\Backend\Domain\obj\Debug\net6.0\Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victor.alves\Downloads\Code\Backend\Domain\obj\Debug\net6.0\Domain.AssemblyInfoInputs.cache
+C:\Users\victor.alves\Downloads\Code\Backend\Domain\obj\Debug\net6.0\Domain.AssemblyInfo.cs
+C:\Users\victor.alves\Downloads\Code\Backend\Domain\obj\Debug\net6.0\Domain.csproj.CoreCompileInputs.cache
+C:\Users\victor.alves\Downloads\Code\Backend\Domain\obj\Debug\net6.0\Domain.dll
+C:\Users\victor.alves\Downloads\Code\Backend\Domain\obj\Debug\net6.0\refint\Domain.dll
+C:\Users\victor.alves\Downloads\Code\Backend\Domain\obj\Debug\net6.0\Domain.pdb
+C:\Users\victor.alves\Downloads\Code\Backend\Domain\obj\Debug\net6.0\Domain.genruntimeconfig.cache
+C:\Users\victor.alves\Downloads\Code\Backend\Domain\obj\Debug\net6.0\ref\Domain.dll
+C:\Users\victor.alves\Downloads\Code\Backend\ASP.NET-Core-Template\Domain\bin\Debug\net6.0\Domain.deps.json
+C:\Users\victor.alves\Downloads\Code\Backend\ASP.NET-Core-Template\Domain\bin\Debug\net6.0\Domain.runtimeconfig.json
+C:\Users\victor.alves\Downloads\Code\Backend\ASP.NET-Core-Template\Domain\bin\Debug\net6.0\Domain.dll
+C:\Users\victor.alves\Downloads\Code\Backend\ASP.NET-Core-Template\Domain\bin\Debug\net6.0\Domain.pdb
+C:\Users\victor.alves\Downloads\Code\Backend\ASP.NET-Core-Template\Domain\obj\Debug\net6.0\Domain.csproj.AssemblyReference.cache
+C:\Users\victor.alves\Downloads\Code\Backend\ASP.NET-Core-Template\Domain\obj\Debug\net6.0\Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victor.alves\Downloads\Code\Backend\ASP.NET-Core-Template\Domain\obj\Debug\net6.0\Domain.AssemblyInfoInputs.cache
+C:\Users\victor.alves\Downloads\Code\Backend\ASP.NET-Core-Template\Domain\obj\Debug\net6.0\Domain.AssemblyInfo.cs
+C:\Users\victor.alves\Downloads\Code\Backend\ASP.NET-Core-Template\Domain\obj\Debug\net6.0\Domain.csproj.CoreCompileInputs.cache
+C:\Users\victor.alves\Downloads\Code\Backend\ASP.NET-Core-Template\Domain\obj\Debug\net6.0\Domain.sourcelink.json
+C:\Users\victor.alves\Downloads\Code\Backend\ASP.NET-Core-Template\Domain\obj\Debug\net6.0\Domain.dll
+C:\Users\victor.alves\Downloads\Code\Backend\ASP.NET-Core-Template\Domain\obj\Debug\net6.0\refint\Domain.dll
+C:\Users\victor.alves\Downloads\Code\Backend\ASP.NET-Core-Template\Domain\obj\Debug\net6.0\Domain.pdb
+C:\Users\victor.alves\Downloads\Code\Backend\ASP.NET-Core-Template\Domain\obj\Debug\net6.0\Domain.genruntimeconfig.cache
+C:\Users\victor.alves\Downloads\Code\Backend\ASP.NET-Core-Template\Domain\obj\Debug\net6.0\ref\Domain.dll
+C:\Users\victo\OneDrive\Desktop\Nova pasta (4)\.NET-Template\Domain\bin\Debug\net6.0\Domain.deps.json
+C:\Users\victo\OneDrive\Desktop\Nova pasta (4)\.NET-Template\Domain\bin\Debug\net6.0\Domain.runtimeconfig.json
+C:\Users\victo\OneDrive\Desktop\Nova pasta (4)\.NET-Template\Domain\bin\Debug\net6.0\Domain.dll
+C:\Users\victo\OneDrive\Desktop\Nova pasta (4)\.NET-Template\Domain\bin\Debug\net6.0\Domain.pdb
+C:\Users\victo\OneDrive\Desktop\Nova pasta (4)\.NET-Template\Domain\obj\Debug\net6.0\Domain.csproj.AssemblyReference.cache
+C:\Users\victo\OneDrive\Desktop\Nova pasta (4)\.NET-Template\Domain\obj\Debug\net6.0\Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\OneDrive\Desktop\Nova pasta (4)\.NET-Template\Domain\obj\Debug\net6.0\Domain.AssemblyInfoInputs.cache
+C:\Users\victo\OneDrive\Desktop\Nova pasta (4)\.NET-Template\Domain\obj\Debug\net6.0\Domain.AssemblyInfo.cs
+C:\Users\victo\OneDrive\Desktop\Nova pasta (4)\.NET-Template\Domain\obj\Debug\net6.0\Domain.csproj.CoreCompileInputs.cache
+C:\Users\victo\OneDrive\Desktop\Nova pasta (4)\.NET-Template\Domain\obj\Debug\net6.0\Domain.sourcelink.json
+C:\Users\victo\OneDrive\Desktop\Nova pasta (4)\.NET-Template\Domain\obj\Debug\net6.0\Domain.dll
+C:\Users\victo\OneDrive\Desktop\Nova pasta (4)\.NET-Template\Domain\obj\Debug\net6.0\refint\Domain.dll
+C:\Users\victo\OneDrive\Desktop\Nova pasta (4)\.NET-Template\Domain\obj\Debug\net6.0\Domain.pdb
+C:\Users\victo\OneDrive\Desktop\Nova pasta (4)\.NET-Template\Domain\obj\Debug\net6.0\Domain.genruntimeconfig.cache
+C:\Users\victo\OneDrive\Desktop\Nova pasta (4)\.NET-Template\Domain\obj\Debug\net6.0\ref\Domain.dll
+C:\Users\victo\Downloads\.NET-Template - Copia\Domain\bin\Debug\net6.0\Domain.deps.json
+C:\Users\victo\Downloads\.NET-Template - Copia\Domain\bin\Debug\net6.0\Domain.runtimeconfig.json
+C:\Users\victo\Downloads\.NET-Template - Copia\Domain\bin\Debug\net6.0\Domain.dll
+C:\Users\victo\Downloads\.NET-Template - Copia\Domain\bin\Debug\net6.0\Domain.pdb
+C:\Users\victo\Downloads\.NET-Template - Copia\Domain\obj\Debug\net6.0\Domain.csproj.AssemblyReference.cache
+C:\Users\victo\Downloads\.NET-Template - Copia\Domain\obj\Debug\net6.0\Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\Downloads\.NET-Template - Copia\Domain\obj\Debug\net6.0\Domain.AssemblyInfoInputs.cache
+C:\Users\victo\Downloads\.NET-Template - Copia\Domain\obj\Debug\net6.0\Domain.AssemblyInfo.cs
+C:\Users\victo\Downloads\.NET-Template - Copia\Domain\obj\Debug\net6.0\Domain.csproj.CoreCompileInputs.cache
+C:\Users\victo\Downloads\.NET-Template - Copia\Domain\obj\Debug\net6.0\Domain.dll
+C:\Users\victo\Downloads\.NET-Template - Copia\Domain\obj\Debug\net6.0\refint\Domain.dll
+C:\Users\victo\Downloads\.NET-Template - Copia\Domain\obj\Debug\net6.0\Domain.pdb
+C:\Users\victo\Downloads\.NET-Template - Copia\Domain\obj\Debug\net6.0\Domain.genruntimeconfig.cache
+C:\Users\victo\Downloads\.NET-Template - Copia\Domain\obj\Debug\net6.0\ref\Domain.dll
+C:\Users\victo\Downloads\Gameout - Projetct\Gameout - API\Domain\bin\Debug\net6.0\Domain.deps.json
+C:\Users\victo\Downloads\Gameout - Projetct\Gameout - API\Domain\bin\Debug\net6.0\Domain.runtimeconfig.json
+C:\Users\victo\Downloads\Gameout - Projetct\Gameout - API\Domain\bin\Debug\net6.0\Domain.dll
+C:\Users\victo\Downloads\Gameout - Projetct\Gameout - API\Domain\bin\Debug\net6.0\Domain.pdb
+C:\Users\victo\Downloads\Gameout - Projetct\Gameout - API\Domain\obj\Debug\net6.0\Domain.csproj.AssemblyReference.cache
+C:\Users\victo\Downloads\Gameout - Projetct\Gameout - API\Domain\obj\Debug\net6.0\Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\Downloads\Gameout - Projetct\Gameout - API\Domain\obj\Debug\net6.0\Domain.AssemblyInfoInputs.cache
+C:\Users\victo\Downloads\Gameout - Projetct\Gameout - API\Domain\obj\Debug\net6.0\Domain.AssemblyInfo.cs
+C:\Users\victo\Downloads\Gameout - Projetct\Gameout - API\Domain\obj\Debug\net6.0\Domain.csproj.CoreCompileInputs.cache
+C:\Users\victo\Downloads\Gameout - Projetct\Gameout - API\Domain\obj\Debug\net6.0\Domain.dll
+C:\Users\victo\Downloads\Gameout - Projetct\Gameout - API\Domain\obj\Debug\net6.0\refint\Domain.dll
+C:\Users\victo\Downloads\Gameout - Projetct\Gameout - API\Domain\obj\Debug\net6.0\Domain.pdb
+C:\Users\victo\Downloads\Gameout - Projetct\Gameout - API\Domain\obj\Debug\net6.0\Domain.genruntimeconfig.cache
+C:\Users\victo\Downloads\Gameout - Projetct\Gameout - API\Domain\obj\Debug\net6.0\ref\Domain.dll
+C:\Users\victo\source\repos\ConsoleApp3\Domain\bin\Debug\net6.0\Domain.deps.json
+C:\Users\victo\source\repos\ConsoleApp3\Domain\bin\Debug\net6.0\Domain.runtimeconfig.json
+C:\Users\victo\source\repos\ConsoleApp3\Domain\bin\Debug\net6.0\Domain.dll
+C:\Users\victo\source\repos\ConsoleApp3\Domain\bin\Debug\net6.0\Domain.pdb
+C:\Users\victo\source\repos\ConsoleApp3\Domain\bin\Debug\net6.0\Packages.Entity.Domain.dll
+C:\Users\victo\source\repos\ConsoleApp3\Domain\bin\Debug\net6.0\Packages.Helpers.Domain.dll
+C:\Users\victo\source\repos\ConsoleApp3\Domain\bin\Debug\net6.0\Packages.Identity.Domain.dll
+C:\Users\victo\source\repos\ConsoleApp3\Domain\bin\Debug\net6.0\Packages.Entity.Domain.pdb
+C:\Users\victo\source\repos\ConsoleApp3\Domain\bin\Debug\net6.0\Packages.Helpers.Domain.pdb
+C:\Users\victo\source\repos\ConsoleApp3\Domain\bin\Debug\net6.0\Packages.Identity.Domain.pdb
+C:\Users\victo\source\repos\ConsoleApp3\Domain\obj\Debug\net6.0\Domain.csproj.AssemblyReference.cache
+C:\Users\victo\source\repos\ConsoleApp3\Domain\obj\Debug\net6.0\Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\source\repos\ConsoleApp3\Domain\obj\Debug\net6.0\Domain.AssemblyInfoInputs.cache
+C:\Users\victo\source\repos\ConsoleApp3\Domain\obj\Debug\net6.0\Domain.AssemblyInfo.cs
+C:\Users\victo\source\repos\ConsoleApp3\Domain\obj\Debug\net6.0\Domain.csproj.CoreCompileInputs.cache
+C:\Users\victo\source\repos\ConsoleApp3\Domain\obj\Debug\net6.0\Domain.csproj.Up2Date
+C:\Users\victo\source\repos\ConsoleApp3\Domain\obj\Debug\net6.0\Domain.dll
+C:\Users\victo\source\repos\ConsoleApp3\Domain\obj\Debug\net6.0\refint\Domain.dll
+C:\Users\victo\source\repos\ConsoleApp3\Domain\obj\Debug\net6.0\Domain.pdb
+C:\Users\victo\source\repos\ConsoleApp3\Domain\obj\Debug\net6.0\Domain.genruntimeconfig.cache
+C:\Users\victo\source\repos\ConsoleApp3\Domain\obj\Debug\net6.0\ref\Domain.dll
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\bin\Debug\net6.0\Domain.deps.json
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\bin\Debug\net6.0\Domain.runtimeconfig.json
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\bin\Debug\net6.0\Domain.dll
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\bin\Debug\net6.0\Domain.pdb
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\bin\Debug\net6.0\Packages.Entity.Domain.dll
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\bin\Debug\net6.0\Packages.Helpers.Domain.dll
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\bin\Debug\net6.0\Packages.Identity.Domain.dll
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\bin\Debug\net6.0\Packages.Entity.Domain.pdb
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\bin\Debug\net6.0\Packages.Helpers.Domain.pdb
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\bin\Debug\net6.0\Packages.Identity.Domain.pdb
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.csproj.AssemblyReference.cache
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.AssemblyInfoInputs.cache
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.AssemblyInfo.cs
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.csproj.CoreCompileInputs.cache
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.sourcelink.json
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.csproj.Up2Date
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.dll
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\obj\Debug\net6.0\refint\Domain.dll
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.pdb
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.genruntimeconfig.cache
+C:\Users\victo\Downloads\Nova pasta\Gameout-Driver\Domain\obj\Debug\net6.0\ref\Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Domain.deps.json
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Domain.runtimeconfig.json
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Domain.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Packages.Entity.Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Packages.Helpers.Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Packages.Identity.Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Packages.Entity.Domain.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Packages.Helpers.Domain.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\bin\Debug\net6.0\Packages.Identity.Domain.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.csproj.AssemblyReference.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.AssemblyInfoInputs.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.AssemblyInfo.cs
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.csproj.CoreCompileInputs.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.sourcelink.json
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.csproj.Up2Date
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\refint\Domain.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\Domain.genruntimeconfig.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Driver\Domain\obj\Debug\net6.0\ref\Domain.dll
