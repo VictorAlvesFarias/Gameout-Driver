@@ -1,8 +1,12 @@
-﻿using Domain.Entitites.ApplicationContext;
+﻿using Application.Dtos;
+using Domain.Entitites.ApplicationContext;
+using Domain.Entitites.ApplicationContextDb;
 using Domain.Queues.AppFileDtos;
 using Infrastructure.Context;
+using Packages.Helpers.Application.Dtos;
 using Packages.Ws.Application.Workers;
 using System.IO.Compression;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
@@ -11,18 +15,16 @@ namespace Drivers.Services.AppFileWatcherService
     public class AppFileWatcherService : IAppFileWatcherService
     {
         private readonly ApplicationContext _applicationContext;
-        private readonly WebSocketClientWorker _webSocketClientWorker;
         private readonly HttpClient _httpClient;
-        private readonly string _apiBaseUrl = "https://localhost:5001/api/appfile";
+        private readonly string _apiBaseUrl = "https://localhost:7000";
 
         public AppFileWatcherService(
-            ApplicationContext applicationContext,
-            WebSocketClientWorker webSocketClientWorker
+            ApplicationContext applicationContext
         )
         {
             _applicationContext = applicationContext;
-            _webSocketClientWorker = webSocketClientWorker;
             _httpClient = new HttpClient();
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "");
         }
 
         public void SingleSync(AppFileUpdateRequestMessage req)
@@ -30,11 +32,24 @@ namespace Drivers.Services.AppFileWatcherService
             SingleSync(req.AppStoredFileId, req.Path);
         }
 
-        public void SetWatchers(AppFileSetEventsRequestMessage req)
+        public void SetWatchers()
         {
+            var response = _httpClient.GetAsync($"{_apiBaseUrl}/get-files").Result;
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Falha ao buscar arquivos. Status: {response.StatusCode}");
+                return;
+            }
+
+            var json = response.Content.ReadAsStringAsync().Result;
+            var req = JsonSerializer.Deserialize<BaseResponse<List<AppFileResponseDto>>>(
+                json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
             var watchers = _applicationContext.AppFileWatchers;
 
-            foreach (var appFile in req.AppFiles)
+            foreach (var appFile in req.Data)
             {
                 var watcher = watchers.FirstOrDefault(e => e.AppFileId == appFile.Id);
 
@@ -61,9 +76,17 @@ namespace Drivers.Services.AppFileWatcherService
                     if (appFile.Observer)
                         RequestSync(appFile.Id);
 
-                    if (appFile.AutoValidateSync)
-                        ValidateSync(new AppFileValidateStatusRequest { AppFile = appFile });
-
+                    if (appFile.AutoValidateSync) { 
+                        ValidateSync(new AppFileValidateStatusRequest
+                        {
+                            AppFile = new AppFile()
+                            {
+                                Path = appFile.Path,
+                                VersionControl = appFile.VersionControl,
+                                Id = appFile.Id
+                            }
+                        });
+                    }
                     Task.Delay(1000).ContinueWith(_ =>
                     {
                         Console.WriteLine($"Arquivo alterado: {e.FullPath}");
@@ -80,7 +103,7 @@ namespace Drivers.Services.AppFileWatcherService
             }
 
             var idsToRemove = _applicationContext.AppFileWatchers
-                .Where(w => !req.AppFiles.Any(a => a.Id == w.AppFileId))
+                .Where(w => !req.Data.Any(a => a.Id == w.AppFileId))
                 .Select(w => w.AppFileId)
                 .ToList();
 
@@ -127,7 +150,7 @@ namespace Drivers.Services.AppFileWatcherService
                 };
 
                 var json = JsonSerializer.Serialize(payload);
-                await _httpClient.PostAsync($"{_apiBaseUrl}/upload-file", new StringContent(json, Encoding.UTF8, "application/json"));
+                await _httpClient.PostAsync($"{_apiBaseUrl}/stream-file", new StringContent(json, Encoding.UTF8, "application/json"));
             }
             catch (Exception ex)
             {

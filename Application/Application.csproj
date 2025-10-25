@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\Packages.Helpers.Application\Packages.Helpers.Application.csproj" />
     <ProjectReference Include="..\Packages.WebSocket.Application\Packages.Ws.Application.csproj" />
   </ItemGroup>
 

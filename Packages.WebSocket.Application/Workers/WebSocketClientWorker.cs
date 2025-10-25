@@ -1,40 +1,45 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
+using System.Net;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 
 namespace Packages.Ws.Application.Workers
 {
-    public delegate Task WebSocketClientHandler<T>(T message, CancellationToken token);
-
     public class WebSocketClientRequest
     {
         public string Event { get; set; }
         public JsonElement? Body { get; set; }
-
         public T Deserialize<T>() => Body.Value.Deserialize<T>();
     }
 
     public class WebSocketClientWorker : BackgroundService
     {
         private readonly ILogger<WebSocketClientWorker> _logger;
-        private readonly Uri _uri;
+        private readonly IServiceProvider _serviceProvider;
         private ClientWebSocket _socket;
         private readonly ConcurrentDictionary<string, Func<WebSocketClientRequest, CancellationToken, Task>> _handlers;
+        private readonly TimeSpan _reconnectDelay;
 
-        public WebSocketClientWorker(ILogger<WebSocketClientWorker> logger, string uri)
+        public WebSocketClientWorker(ILogger<WebSocketClientWorker> logger, IServiceProvider serviceProvider, TimeSpan? reconnectDelay = null)
         {
             _logger = logger;
-            _uri = new Uri(uri);
-            _socket = new ClientWebSocket();
+            _serviceProvider = serviceProvider;
             _handlers = new ConcurrentDictionary<string, Func<WebSocketClientRequest, CancellationToken, Task>>();
+            _socket = new ClientWebSocket();
+            _reconnectDelay = reconnectDelay ?? TimeSpan.FromSeconds(3);
         }
 
-        public void Subscribe(string type, Func<WebSocketClientRequest, CancellationToken, Task> handler)
+        protected virtual string GetUrl() => "ws://localhost:5000/ws";
+        protected virtual Dictionary<string, string> GetHeaders() => new();
+        protected virtual CookieContainer GetCookies() => new();
+        protected virtual TimeSpan GetReconnectDelay() => _reconnectDelay;
+
+        public void Subscribe(string eventType, Func<WebSocketClientRequest, CancellationToken, Task> handler)
         {
-            _handlers[type] = handler;
+            _handlers[eventType] = handler;
         }
 
         public async Task SendAsync<T>(T payload, CancellationToken token = default)
@@ -44,24 +49,7 @@ namespace Packages.Ws.Application.Workers
 
             var json = JsonSerializer.Serialize(payload);
             var bytes = Encoding.UTF8.GetBytes(json);
-            var seg = new ArraySegment<byte>(bytes);
-
-            try
-            {
-                await _socket.SendAsync(seg, WebSocketMessageType.Text, true, token);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Erro enviando mensagem WS");
-            }
-        }
-
-        public async Task BroadcastAsync<T>(T payload, Func<T, bool>? filter = null, CancellationToken token = default)
-        {
-            if (filter != null && !filter(payload))
-                return;
-
-            await SendAsync(payload, token);
+            await _socket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, token);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -71,22 +59,29 @@ namespace Packages.Ws.Application.Workers
                 try
                 {
                     _socket = new ClientWebSocket();
-                    await _socket.ConnectAsync(_uri, stoppingToken);
-                    _logger.LogInformation("Cliente WS conectado: {0}", _uri);
+                    var url = GetUrl();
+
+                    foreach (var header in GetHeaders())
+                        _socket.Options.SetRequestHeader(header.Key, header.Value);
+
+                    _socket.Options.Cookies = GetCookies();
+
+                    await _socket.ConnectAsync(new Uri(url), stoppingToken);
+                    _logger.LogInformation("Cliente WS conectado: {0}", url);
 
                     await ReceiveLoop(stoppingToken);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Erro na conexão WS, reconectando em 3s...");
-                    await Task.Delay(3000, stoppingToken);
+                    _logger.LogWarning(ex, "Erro na conexão WS, reconectando em {0}s...", GetReconnectDelay().TotalSeconds);
+                    await Task.Delay(GetReconnectDelay(), stoppingToken);
                 }
             }
         }
 
         private async Task ReceiveLoop(CancellationToken token)
         {
-            var buffer = new byte[4 * 1024];
+            var buffer = new byte[8 * 1024];
 
             while (_socket.State == WebSocketState.Open && !token.IsCancellationRequested)
             {
@@ -115,14 +110,12 @@ namespace Packages.Ws.Application.Workers
         {
             try
             {
-                var wsReq = JsonSerializer.Deserialize<WebSocketClientRequest>(message);
-                if (wsReq == null || string.IsNullOrWhiteSpace(wsReq.Event))
+                var req = JsonSerializer.Deserialize<WebSocketClientRequest>(message);
+                if (req == null || string.IsNullOrWhiteSpace(req.Event))
                     return;
 
-                if (_handlers.TryGetValue(wsReq.Event, out var handler))
-                {
-                    _ = Task.Run(() => handler(wsReq, token), token);
-                }
+                if (_handlers.TryGetValue(req.Event, out var handler))
+                    _ = Task.Run(() => handler(req, token), token);
             }
             catch (Exception ex)
             {
@@ -135,9 +128,7 @@ namespace Packages.Ws.Application.Workers
             try
             {
                 if (_socket != null && _socket.State == WebSocketState.Open)
-                {
                     await _socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Service stopping", cancellationToken);
-                }
             }
             catch { }
 
