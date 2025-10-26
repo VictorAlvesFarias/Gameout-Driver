@@ -31,7 +31,7 @@ namespace Packages.Ws.Application.Workers
             return new Dictionary<string, string>
             {
                 { "type", "drive" },
-                { "authorization", userId }
+                { "id", userId }
             };
         }
 

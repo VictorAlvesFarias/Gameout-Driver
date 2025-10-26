@@ -24,7 +24,7 @@ namespace Drivers.Services.AppFileWatcherService
         {
             _applicationContext = applicationContext;
             _httpClient = new HttpClient();
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "");
+            _httpClient.DefaultRequestHeaders.Add("id", "5ba42c41-66c3-4736-9351-0c7ea8a2c058");
         }
 
         public void SingleSync(AppFileUpdateRequestMessage req)
@@ -184,11 +184,16 @@ namespace Drivers.Services.AppFileWatcherService
             try
             {
                 if (File.Exists(path))
+                {
                     sizeInBytes = new FileInfo(path).Length;
+                }
                 else if (Directory.Exists(path))
+                {
                     sizeInBytes = GetDirectorySize(Directory.GetFiles(path, "*", SearchOption.AllDirectories));
-                else
+                }
+                else {    
                     throw new FileNotFoundException($"Caminho não encontrado: {path}");
+                }
             }
             catch (Exception ex)
             {
