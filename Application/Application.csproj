@@ -7,10 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Web.Api.Toolkit.Helpers.Application" Version="1.0.4" />
+    <PackageReference Include="Web.Api.Toolkit.Identity.Application" Version="1.0.4" />
+    <PackageReference Include="Web.Api.Toolkit.Ws.Application" Version="1.0.4" />
+    <PackageReference Include="Ws.Application" Version="1.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
-    <ProjectReference Include="..\Packages.Helpers.Application\Packages.Helpers.Application.csproj" />
-    <ProjectReference Include="..\Packages.WebSocket.Application\Packages.Ws.Application.csproj" />
   </ItemGroup>
 
 </Project>

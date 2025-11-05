@@ -6,6 +6,6 @@ namespace Api.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        
+
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Domain.Queues.AppFileDtos;
 
-namespace Drivers.Services.AppFileWatcherService
+namespace Application.Services.AppFileWatcherService
 {
     public interface IAppFileWatcherService
     {

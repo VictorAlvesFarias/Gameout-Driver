@@ -3,14 +3,12 @@ using Domain.Entitites.ApplicationContext;
 using Domain.Entitites.ApplicationContextDb;
 using Domain.Queues.AppFileDtos;
 using Infrastructure.Context;
-using Packages.Helpers.Application.Dtos;
-using Packages.Ws.Application.Workers;
 using System.IO.Compression;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using Web.Api.Toolkit.Helpers.Application.Dtos;
 
-namespace Drivers.Services.AppFileWatcherService
+namespace Application.Services.AppFileWatcherService
 {
     public class AppFileWatcherService : IAppFileWatcherService
     {
@@ -76,7 +74,8 @@ namespace Drivers.Services.AppFileWatcherService
                     if (appFile.Observer)
                         RequestSync(appFile.Id);
 
-                    if (appFile.AutoValidateSync) { 
+                    if (appFile.AutoValidateSync)
+                    {
                         ValidateSync(new AppFileValidateStatusRequest
                         {
                             AppFile = new AppFile()
@@ -191,7 +190,8 @@ namespace Drivers.Services.AppFileWatcherService
                 {
                     sizeInBytes = GetDirectorySize(Directory.GetFiles(path, "*", SearchOption.AllDirectories));
                 }
-                else {    
+                else
+                {
                     throw new FileNotFoundException($"Caminho não encontrado: {path}");
                 }
             }

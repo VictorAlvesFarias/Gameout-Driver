@@ -318,7 +318,7 @@ __pycache__/
 
 # Cake - Uncomment if you are using it
 # tools/**
-# !tools/packages.config
+# !tools/Web.Api.Toolkit.config
 
 # Tabs Studio
 *.tss

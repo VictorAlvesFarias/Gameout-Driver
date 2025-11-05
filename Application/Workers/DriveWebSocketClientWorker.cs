@@ -1,11 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Threading;
+using Ws.Application.Workers;
 
-namespace Packages.Ws.Application.Workers
+namespace Application.Workers
 {
     public class DriveWebSocketClientWorker : WebSocketClientWorker
     {
@@ -15,7 +13,7 @@ namespace Packages.Ws.Application.Workers
             ILogger<DriveWebSocketClientWorker> logger,
             IServiceProvider serviceProvider,
             IConfiguration configuration
-        ) : base(logger, serviceProvider, TimeSpan.FromSeconds(5))
+        ) : base(logger, TimeSpan.FromSeconds(5))
         {
             _configuration = configuration;
         }

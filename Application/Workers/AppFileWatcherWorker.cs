@@ -1,14 +1,7 @@
-﻿using Domain.Entitites.ApplicationContext;
+﻿using Application.Services.AppFileWatcherService;
 using Domain.Queues.AppFileDtos;
-using Drivers.Services.AppFileWatcherService;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Packages.Ws.Application.Workers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Workers
 {

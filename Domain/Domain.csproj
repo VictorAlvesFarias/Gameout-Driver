@@ -12,12 +12,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Packages.Entity.Domain\Packages.Entity.Domain.csproj" />
-    <ProjectReference Include="..\Packages.Helpers.Domain\Packages.Helpers.Domain.csproj" />
-    <ProjectReference Include="..\Packages.Identity.Domain\Packages.Identity.Domain.csproj" />
+    <PackageReference Include="Web.Api.Toolkit.Entity.Domain" Version="1.0.4" />
+    <PackageReference Include="Web.Api.Toolkit.Helpers.Domain" Version="1.0.4" />
+    <PackageReference Include="Web.Api.Toolkit.Identity.Domain" Version="1.0.4" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,6 @@
+using Application.Services.AppFileWatcherService;
 using Application.Workers;
-using Drivers.Services.AppFileWatcherService;
 using Infrastructure.Context;
-using Packages.Ws.Application.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
 
