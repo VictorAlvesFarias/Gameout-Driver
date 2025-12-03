@@ -30,16 +30,10 @@ namespace Application.Workers
                 appFileWatcherService.SingleSync(req);
             });
 
-            webSocketClientWorker.Subscribe("IsProcessing", async (message, cancellationToken) =>
+            webSocketClientWorker.Subscribe("CheckStatus", async (message, cancellationToken) =>
             {
                 var req = message.Deserialize<AppFileStatusCheckRequestMessage>();
-                appFileWatcherService.IsProcessing(req);
-            });
-
-            webSocketClientWorker.Subscribe("ValidateSync", async (message, cancellationToken) =>
-            {
-                var req = message.Deserialize<AppFileValidateStatusRequest>();
-                appFileWatcherService.ValidateSync(req);
+                await appFileWatcherService.IsProcessing(req);
             });
 
             return Task.CompletedTask;

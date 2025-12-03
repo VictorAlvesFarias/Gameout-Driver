@@ -1,12 +1,18 @@
 ﻿using Application.Dtos;
+using Application.Dtos.AppFile;
+using Application.Types;
 using Domain.Entitites.ApplicationContext;
 using Domain.Entitites.ApplicationContextDb;
+using Domain.Entitites.Shared;
 using Domain.Queues.AppFileDtos;
 using Infrastructure.Context;
+using Microsoft.Extensions.Configuration;
+using System.IO;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
 using Web.Api.Toolkit.Helpers.Application.Dtos;
+using Web.Api.Toolkit.Queues.Application.Services;
 
 namespace Application.Services.AppFileWatcherService
 {
@@ -15,204 +21,275 @@ namespace Application.Services.AppFileWatcherService
         private readonly ApplicationContext _applicationContext;
         private readonly HttpClient _httpClient;
         private readonly string _apiBaseUrl = "https://localhost:7000";
+        private readonly string _apiKey;
+        private readonly IQueueService<AppFileUpdateRequestMessage> _updateQueue;
 
         public AppFileWatcherService(
-            ApplicationContext applicationContext
+            ApplicationContext applicationContext,
+            IConfiguration configuration,
+            IQueueService<AppFileUpdateRequestMessage> updateQueue
         )
         {
             _applicationContext = applicationContext;
+            _apiKey = configuration["ApiKey"] ?? string.Empty;
             _httpClient = new HttpClient();
-            _httpClient.DefaultRequestHeaders.Add("id", "5ba42c41-66c3-4736-9351-0c7ea8a2c058");
+            _updateQueue = updateQueue;
+
+            if (!string.IsNullOrWhiteSpace(_apiKey))
+                _httpClient.DefaultRequestHeaders.Add("X-API-Key", _apiKey);
         }
 
-        public void SingleSync(AppFileUpdateRequestMessage req)
+        private async Task SendAppFileStatus(int id, AppFileStatusTypes status, string message, string details)
         {
-            SingleSync(req.AppStoredFileId, req.Path);
+            var dto = new UpdateAppFileStatusRequestDto
+            {
+                AppFileId = id,
+                Status = status,
+                StatusMessage = message,
+                StatusDetails = details
+            };
+
+            var json = JsonSerializer.Serialize(dto);
+
+            await _httpClient.PutAsync(
+                $"{_apiBaseUrl}/update-appfile-status",
+                new StringContent(json, Encoding.UTF8, "application/json")
+            );
+        }
+
+        private async Task SendAppStoredFileStatus(int id, AppStoredFileStatusTypes status, string message, string details)
+        {
+            var dto = new UpdateAppStoredFileStatusRequestDto
+            {
+                AppStoredFileId = id,
+                Status = status,
+                StatusMessage = message,
+                StatusDetails = details
+            };
+
+            var json = JsonSerializer.Serialize(dto);
+
+            await _httpClient.PutAsync(
+                $"{_apiBaseUrl}/update-appstoredfile-status",
+                new StringContent(json, Encoding.UTF8, "application/json")
+            );
+        }
+
+        private bool DirectoryAccessible(string path)
+        {
+            try
+            {
+                var files = Directory.GetFiles(path, "*", SearchOption.TopDirectoryOnly);
+
+                foreach (var file in files)
+                {
+                    using var stream = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public void SetWatchers()
         {
-            var response = _httpClient.GetAsync($"{_apiBaseUrl}/get-files").Result;
+            var jsonResponse = "";
 
-            if (!response.IsSuccessStatusCode)
-            {
-                Console.WriteLine($"Falha ao buscar arquivos. Status: {response.StatusCode}");
-                return;
-            }
-
-            var json = response.Content.ReadAsStringAsync().Result;
-            var req = JsonSerializer.Deserialize<BaseResponse<List<AppFileResponseDto>>>(
-                json,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-            );
-            var watchers = _applicationContext.AppFileWatchers;
-
-            foreach (var appFile in req.Data)
-            {
-                var watcher = watchers.FirstOrDefault(e => e.AppFileId == appFile.Id);
-
-                if (watcher is not null || !Directory.Exists(appFile.Path))
-                    continue;
-
-                watcher = new AppFileWatcher() { AppFileId = appFile.Id };
-
-                watcher.FileSystemWatcher = new FileSystemWatcher(appFile.Path)
-                {
-                    IncludeSubdirectories = true,
-                    EnableRaisingEvents = true
-                };
-
-                watcher.FileSystemWatcher.Deleted += (s, e) =>
-                {
-                    Console.WriteLine($"Arquivo removido: {e.FullPath}");
-                };
-
-                watcher.FileSystemWatcher.Changed += (s, e) =>
-                {
-                    watcher.FileSystemWatcher.EnableRaisingEvents = false;
-
-                    if (appFile.Observer)
-                        RequestSync(appFile.Id);
-
-                    if (appFile.AutoValidateSync)
-                    {
-                        ValidateSync(new AppFileValidateStatusRequest
-                        {
-                            AppFile = new AppFile()
-                            {
-                                Path = appFile.Path,
-                                VersionControl = appFile.VersionControl,
-                                Id = appFile.Id
-                            }
-                        });
-                    }
-                    Task.Delay(1000).ContinueWith(_ =>
-                    {
-                        Console.WriteLine($"Arquivo alterado: {e.FullPath}");
-                        watcher.FileSystemWatcher.EnableRaisingEvents = true;
-                    });
-                };
-
-                watcher.FileSystemWatcher.Renamed += (s, e) =>
-                {
-                    Console.WriteLine($"Arquivo renomeado: {e.FullPath}");
-                };
-
-                _applicationContext.AppFileWatchers.Add(watcher);
-            }
-
-            var idsToRemove = _applicationContext.AppFileWatchers
-                .Where(w => !req.Data.Any(a => a.Id == w.AppFileId))
-                .Select(w => w.AppFileId)
-                .ToList();
-
-            foreach (var id in idsToRemove)
-            {
-                var watcher = _applicationContext.AppFileWatchers.First(w => w.AppFileId == id);
-                watcher.FileSystemWatcher.EnableRaisingEvents = false;
-                watcher.FileSystemWatcher.Dispose();
-                _applicationContext.AppFileWatchers.Remove(watcher);
-            }
-        }
-
-        public async void IsProcessing(AppFileStatusCheckRequestMessage req)
-        {
-            var response = new AppFileStatusCheckResponseMessage
-            {
-                AppStoredFileId = req.AppStoredFileId,
-                Error = null,
-                Message = "Processing check executed successfully."
-            };
-
-            var json = JsonSerializer.Serialize(response);
-            await _httpClient.PostAsync($"{_apiBaseUrl}/status", new StringContent(json, Encoding.UTF8, "application/json"));
-        }
-
-        private async void SingleSync(int appStoredFileId, string path)
-        {
             try
             {
-                using var memoryStream = new MemoryStream();
-                using var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true);
-                var files = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
+                var response = _httpClient.GetAsync($"{_apiBaseUrl}/get-files").Result;
+                jsonResponse = response.Content.ReadAsStringAsync().Result;
 
-                foreach (var file in files)
-                    archive.CreateEntryFromFile(file, Path.GetRelativePath(path, file));
+                var body = JsonSerializer.Deserialize<BaseResponse<List<AppFileResponseDto>>>(
+                    jsonResponse,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                );
 
-                memoryStream.Seek(0, SeekOrigin.Begin);
+                response.EnsureSuccessStatusCode();
 
-                var payload = new AppFileUpdateResponseMessag
+                var watchers = _applicationContext.AppFileWatchers;
+
+                foreach (var appFile in body.Data)
                 {
-                    AppStoredFileId = appStoredFileId,
-                    MemoryStream = memoryStream.ToArray(),
-                    UncompressedSize = GetDirectorySize(files)
-                };
+                    var watcher = watchers.FirstOrDefault(e => e.AppFileId == appFile.Id);
 
-                var json = JsonSerializer.Serialize(payload);
-                await _httpClient.PostAsync($"{_apiBaseUrl}/stream-file", new StringContent(json, Encoding.UTF8, "application/json"));
+                    if (watcher is not null)
+                        continue;
+
+                    if (!Directory.Exists(appFile.Path))
+                    {
+                        SendAppFileStatus(appFile.Id, AppFileStatusTypes.Error, "Path does not exist", appFile.Path).Wait();
+                        continue;
+                    }
+
+                    if (!DirectoryAccessible(appFile.Path))
+                    {
+                        SendAppFileStatus(appFile.Id, AppFileStatusTypes.Error, "Path unavailable", appFile.Path).Wait();
+                        continue;
+                    }
+
+                    watcher = new AppFileWatcher { AppFileId = appFile.Id };
+
+                    watcher.FileSystemWatcher = new FileSystemWatcher(appFile.Path)
+                    {
+                        IncludeSubdirectories = true,
+                        EnableRaisingEvents = true
+                    };
+
+                    watcher.FileSystemWatcher.Changed += async (s, e) =>
+                    {
+                        watcher.FileSystemWatcher.EnableRaisingEvents = false;
+
+                        if (!this.DirectoryAccessible(appFile.Path))
+                        {
+                            this.SendAppFileStatus(appFile.Id, AppFileStatusTypes.Error, "Path locked or in use", appFile.Path).Wait();
+                        }
+                        else
+                        {
+                            if (appFile.Observer)
+                            {
+                                this.RequestSync(appFile.Id);
+                            }
+
+                            if (appFile.AutoValidateSync)
+                            {
+                                await SendAppFileStatus(appFile.Id, AppFileStatusTypes.Unsynced,"Unsynced","");
+                            }
+                        }
+
+                        Task.Delay(1000).ContinueWith(_ =>
+                        {
+                            watcher.FileSystemWatcher.EnableRaisingEvents = true;
+                        });
+                    };
+
+                    _applicationContext.AppFileWatchers.Add(watcher);
+                }
+
+                var idsToRemove = watchers
+                    .Where(w => !body.Data.Any(a => a.Id == w.AppFileId))
+                    .Select(w => w.AppFileId)
+                    .ToList();
+
+                foreach (var id in idsToRemove)
+                {
+                    var watcher = watchers.First(w => w.AppFileId == id);
+                    watcher.FileSystemWatcher.EnableRaisingEvents = false;
+                    watcher.FileSystemWatcher.Dispose();
+                    watchers.Remove(watcher);
+                }
             }
             catch (Exception ex)
             {
-                var error = new AppFileErrorMessage
-                {
-                    AppStoredFileId = appStoredFileId,
-                    Mensagem = "An error occurred during the process of sync app file.",
-                    Error = ex.Message
-                };
+                SendAppFileStatus(0, AppFileStatusTypes.Error, ex.Message, jsonResponse + ex.StackTrace).Wait();
+            }
+        }
 
-                var json = JsonSerializer.Serialize(error);
-                await _httpClient.PostAsync($"{_apiBaseUrl}/upload-error", new StringContent(json, Encoding.UTF8, "application/json"));
+        public async Task IsProcessing(AppFileStatusCheckRequestMessage body)
+        {
+            var isInQueue = _updateQueue.Contains(e => e.AppStoredFileId == body.AppStoredFileId);
+
+            if (!isInQueue)
+            {
+                await this.SendAppStoredFileStatus(body.AppStoredFileId, AppStoredFileStatusTypes.Complete, "Complete", "The queue not contains file to be proccessed.");
+            }
+            else if (!Directory.Exists(body.Path))
+            {
+                await this.SendAppStoredFileStatus(body.AppStoredFileId, AppStoredFileStatusTypes.PendingWithError, "Path does not exist", body.Path);
+            }
+            else if (!DirectoryAccessible(body.Path))
+            {
+                await this.SendAppStoredFileStatus(body.AppStoredFileId, AppStoredFileStatusTypes.PendingWithError, "Path locked or in use", body.Path);
+            }
+        }
+
+        public async Task ProcessSingleSync(int appStoredFileId, string path)
+        {
+            var jsonResponse = "";
+
+            try
+            {
+                if (!Directory.Exists(path))
+                {
+                    await SendAppStoredFileStatus(appStoredFileId, AppStoredFileStatusTypes.Error, "Path does not exist", path);
+                    return;
+                }
+
+                if (!DirectoryAccessible(path))
+                {
+                    await SendAppStoredFileStatus(appStoredFileId, AppStoredFileStatusTypes.Error, "Path locked or in use", path);
+                    return;
+                }
+
+                using var memoryStream = new MemoryStream();
+                using var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true);
+
+                var files = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
+
+                foreach (var file in files)
+                {
+                    archive.CreateEntryFromFile(file, Path.GetRelativePath(path, file));
+                }
+
+                memoryStream.Seek(0, SeekOrigin.Begin);
+
+                var uncompressedSize = GetDirectorySize(files);
+
+                using var content = new MultipartFormDataContent();
+
+                content.Add(new StringContent(appStoredFileId.ToString()), "appStoredFileId");
+                content.Add(new StringContent(uncompressedSize.ToString()), "originalFileSize");
+
+                var fileContent = new ByteArrayContent(memoryStream.ToArray());
+                fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/zip");
+
+                content.Add(fileContent, "file", "archive.zip");
+
+                var response = await _httpClient.PostAsync(
+                    $"{_apiBaseUrl}/stream-file",
+                    content
+                );
+
+                jsonResponse = await response.Content.ReadAsStringAsync();
+
+                response.EnsureSuccessStatusCode();
+            }
+            catch (Exception ex)
+            {
+                await SendAppStoredFileStatus(appStoredFileId, AppStoredFileStatusTypes.Error, ex.Message, jsonResponse + ex.StackTrace);
             }
         }
 
         private async void RequestSync(int appFileId)
         {
-            var payload = new AppFileSyncRequestMessage { AppFileId = appFileId };
-            var json = JsonSerializer.Serialize(payload);
-            await _httpClient.PostAsync($"{_apiBaseUrl}/request-sync", new StringContent(json, Encoding.UTF8, "application/json"));
-        }
-
-        public async void ValidateSync(AppFileValidateStatusRequest req)
-        {
-            if (req?.AppFile == null)
-                throw new ArgumentNullException(nameof(req.AppFile));
-
-            var path = req.AppFile.Path;
-            double sizeInBytes = 0;
+            var jsonResponse = "";
 
             try
             {
-                if (File.Exists(path))
-                {
-                    sizeInBytes = new FileInfo(path).Length;
-                }
-                else if (Directory.Exists(path))
-                {
-                    sizeInBytes = GetDirectorySize(Directory.GetFiles(path, "*", SearchOption.AllDirectories));
-                }
-                else
-                {
-                    throw new FileNotFoundException($"Caminho não encontrado: {path}");
-                }
+                var body = new AppFileSyncRequestDto { IdAppFile = appFileId };
+                var json = JsonSerializer.Serialize(body);
+
+                var response = await _httpClient.PostAsync(
+                    $"{_apiBaseUrl}/request-sync",
+                    new StringContent(json, Encoding.UTF8, "application/json")
+                );
+
+                jsonResponse = await response.Content.ReadAsStringAsync();
+
+                response.EnsureSuccessStatusCode();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro ao calcular tamanho: {ex.Message}");
+                await SendAppFileStatus(appFileId, AppFileStatusTypes.Error, ex.Message, jsonResponse + ex.StackTrace);
             }
-
-            var response = new AppFileValidateStatusResponse
-            {
-                AppFileId = req.AppFile.Id,
-                SizeInBytes = sizeInBytes
-            };
-
-            var json = JsonSerializer.Serialize(response);
-            await _httpClient.PostAsync($"{_apiBaseUrl}/validate", new StringContent(json, Encoding.UTF8, "application/json"));
         }
 
         public long GetDirectorySize(IEnumerable<string> files)
         {
             long size = 0;
+
             foreach (var file in files)
             {
                 try
@@ -222,7 +299,13 @@ namespace Application.Services.AppFileWatcherService
                 }
                 catch { }
             }
+
             return size;
+        }
+
+        public void SingleSync(AppFileUpdateRequestMessage body)
+        {
+            _updateQueue.EnqueueAsync(body);
         }
     }
 }
