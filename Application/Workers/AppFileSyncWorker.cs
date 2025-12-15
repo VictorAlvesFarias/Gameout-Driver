@@ -8,11 +8,11 @@ namespace Application.Workers
 {
     public class AppFileSyncWorker : BackgroundService
     {
-        private readonly IQueueService<AppFileUpdateRequestMessage> _queue;
+        private readonly IQueueService<AppFileProcessingQueueItem> _queue;
         private readonly IServiceProvider _serviceProvider;
 
         public AppFileSyncWorker(
-            IQueueService<AppFileUpdateRequestMessage> queue,
+            IQueueService<AppFileProcessingQueueItem> queue,
             IServiceProvider serviceProvider
         )
         {
@@ -29,7 +29,7 @@ namespace Application.Workers
 
                 await using (handle)
                 {
-                    await Task.Run(() => watcherService.ProcessSingleSync(handle.Item.AppStoredFileId, handle.Item.Path), stoppingToken);
+                    await Task.Run(() => watcherService.ProcessSingleSync(handle.Item), stoppingToken);
                 }
             }
         }

@@ -24,14 +24,14 @@ namespace Application.Services.AppFileWatcherService
         private readonly ApplicationContext _applicationContext;
         private readonly string _apiBaseUrl = "https://localhost:7000";
         private readonly string _apiKey;
-        private readonly IQueueService<AppFileUpdateRequestMessage> _updateQueue;
+        private readonly IQueueService<AppFileProcessingQueueItem> _updateQueue;
         private readonly ILoggingService _loggingService;
         private readonly IWebSocketRequestContextAccessor _contextAccessor;
 
         public AppFileWatcherService(
             ApplicationContext applicationContext,
             IConfiguration configuration,
-            IQueueService<AppFileUpdateRequestMessage> updateQueue,
+            IQueueService<AppFileProcessingQueueItem> updateQueue,
             ILoggingService loggingService,
             IWebSocketRequestContextAccessor contextAccessor
         )
@@ -76,6 +76,42 @@ namespace Application.Services.AppFileWatcherService
             }
             catch { }
             
+            return null;
+        }
+
+        private async Task<string?> GetOrCreateTraceId()
+        {
+            var traceId = GetTraceId();
+            
+            if (!string.IsNullOrEmpty(traceId))
+            {
+                return traceId;
+            }
+
+            try
+            {
+                using var httpClient = CreateHttpClient();
+                var response = await httpClient.GetAsync($"{_apiBaseUrl}/get-trace-id");
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var body = JsonSerializer.Deserialize<BaseResponse<int>>(
+                    jsonResponse,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                );
+
+                if (body?.Success == true && body.Data > 0)
+                {
+                    return body.Data.ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                await _loggingService.SendErrorLogAsync(
+                    $"Error creating trace id: {ex.Message}",
+                    "GetOrCreateTraceId",
+                    ex.StackTrace ?? ""
+                );
+            }
+
             return null;
         }
 
@@ -259,33 +295,33 @@ namespace Application.Services.AppFileWatcherService
             }
         }
 
-        public async Task ProcessSingleSync(int appStoredFileId, string path)
+        public async Task ProcessSingleSync(AppFileProcessingQueueItem queueItem)
         {
             var jsonResponse = "";
-            var traceId = GetTraceId();
+            var traceId = queueItem.TraceId;
 
             try
             {
-                if (!Directory.Exists(path))
+                if (!Directory.Exists(queueItem.Path))
                 {
-                    await SendAppStoredFileStatus(appStoredFileId, AppStoredFileStatusTypes.Error, "Path does not exist", path, traceId);
+                    await SendAppStoredFileStatus(queueItem.AppStoredFileId, AppStoredFileStatusTypes.Error, "Path does not exist", queueItem.Path, traceId);
                     return;
                 }
 
-                if (!DirectoryAccessible(path))
+                if (!DirectoryAccessible(queueItem.Path))
                 {
-                    await SendAppStoredFileStatus(appStoredFileId, AppStoredFileStatusTypes.Error, "Path locked or in use", path, traceId);
+                    await SendAppStoredFileStatus(queueItem.AppStoredFileId, AppStoredFileStatusTypes.Error, "Path locked or in use", queueItem.Path, traceId);
                     return;
                 }
 
                 using var memoryStream = new MemoryStream();
                 using var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true);
 
-                var files = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
+                var files = Directory.GetFiles(queueItem.Path, "*", SearchOption.AllDirectories);
 
                 foreach (var file in files)
                 {
-                    archive.CreateEntryFromFile(file, Path.GetRelativePath(path, file));
+                    archive.CreateEntryFromFile(file, Path.GetRelativePath(queueItem.Path, file));
                 }
 
                 memoryStream.Seek(0, SeekOrigin.Begin);
@@ -294,7 +330,7 @@ namespace Application.Services.AppFileWatcherService
 
                 using var content = new MultipartFormDataContent();
 
-                content.Add(new StringContent(appStoredFileId.ToString()), "appStoredFileId");
+                content.Add(new StringContent(queueItem.AppStoredFileId.ToString()), "appStoredFileId");
                 content.Add(new StringContent(uncompressedSize.ToString()), "originalFileSize");
 
                 var fileContent = new ByteArrayContent(memoryStream.ToArray());
@@ -315,18 +351,18 @@ namespace Application.Services.AppFileWatcherService
             catch (Exception ex)
             {
                 await _loggingService.SendErrorLogAsync(
-                    $"Error in ProcessSingleSync for AppStoredFileId {appStoredFileId}: {ex.Message}",
+                    $"Error in ProcessSingleSync for AppStoredFileId {queueItem.AppStoredFileId}: {ex.Message}",
                     "ProcessSingleSync",
                     jsonResponse + "\n" + ex.StackTrace
                 );
-                await SendAppStoredFileStatus(appStoredFileId, AppStoredFileStatusTypes.Error, ex.Message, jsonResponse + ex.StackTrace, traceId);
+                await SendAppStoredFileStatus(queueItem.AppStoredFileId, AppStoredFileStatusTypes.Error, ex.Message, jsonResponse + ex.StackTrace, traceId);
             }
         }
 
         private async void RequestSync(int appFileId)
         {
             var jsonResponse = "";
-            var traceId = GetTraceId();
+            var traceId = await GetOrCreateTraceId();
 
             try
             {
@@ -380,7 +416,14 @@ namespace Application.Services.AppFileWatcherService
 
         public void SingleSync(AppFileUpdateRequestMessage body)
         {
-            _updateQueue.EnqueueAsync(body);
+            var traceId = GetTraceId();
+            var queueItem = new AppFileProcessingQueueItem
+            {
+                AppStoredFileId = body.AppStoredFileId,
+                Path = body.Path,
+                TraceId = traceId
+            };
+            _updateQueue.EnqueueAsync(queueItem);
         }
     }
 }

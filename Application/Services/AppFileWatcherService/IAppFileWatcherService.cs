@@ -6,7 +6,7 @@ namespace Application.Services.AppFileWatcherService
     {
         void SetWatchers();
         void SingleSync(AppFileUpdateRequestMessage req);
-        Task ProcessSingleSync(int appStoredFileId, string path);
+        Task ProcessSingleSync(AppFileProcessingQueueItem queueItem);
         Task IsProcessing(AppFileStatusCheckRequestMessage req);
     }
 }
