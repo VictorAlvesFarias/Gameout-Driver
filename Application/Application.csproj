@@ -7,11 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Web.Api.Toolkit.Helpers.Application" Version="1.0.4" />
-    <PackageReference Include="Web.Api.Toolkit.Identity.Application" Version="1.0.4" />
-    <PackageReference Include="Web.Api.Toolkit.Queues.Application" Version="1.0.4" />
-    <PackageReference Include="Web.Api.Toolkit.Ws.Application" Version="1.0.4" />
-    <PackageReference Include="Ws.Application" Version="1.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.1" />
+    <PackageReference Include="Web.Api.Toolkit.Helpers.Application" Version="1.0.27" />
+    <PackageReference Include="Web.Api.Toolkit.Identity.Application" Version="1.0.27" />
+    <PackageReference Include="Web.Api.Toolkit.Queues.Application" Version="1.0.27" />
+    <PackageReference Include="Web.Api.Toolkit.Ws.Application" Version="1.0.27" />
   </ItemGroup>
 
   <ItemGroup>

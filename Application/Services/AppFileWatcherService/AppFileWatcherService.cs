@@ -1,5 +1,6 @@
 ﻿using Application.Dtos;
 using Application.Dtos.AppFile;
+using Application.Services.LoggingService;
 using Application.Types;
 using Domain.Entitites.ApplicationContext;
 using Domain.Entitites.ApplicationContextDb;
@@ -13,33 +14,72 @@ using System.Text;
 using System.Text.Json;
 using Web.Api.Toolkit.Helpers.Application.Dtos;
 using Web.Api.Toolkit.Queues.Application.Services;
+using Web.Api.Toolkit.Ws.Application.Contexts;
+using Web.Api.Toolkit.Ws.Application.Dtos;
 
 namespace Application.Services.AppFileWatcherService
 {
     public class AppFileWatcherService : IAppFileWatcherService
     {
         private readonly ApplicationContext _applicationContext;
-        private readonly HttpClient _httpClient;
         private readonly string _apiBaseUrl = "https://localhost:7000";
         private readonly string _apiKey;
         private readonly IQueueService<AppFileUpdateRequestMessage> _updateQueue;
+        private readonly ILoggingService _loggingService;
+        private readonly IWebSocketRequestContextAccessor _contextAccessor;
 
         public AppFileWatcherService(
             ApplicationContext applicationContext,
             IConfiguration configuration,
-            IQueueService<AppFileUpdateRequestMessage> updateQueue
+            IQueueService<AppFileUpdateRequestMessage> updateQueue,
+            ILoggingService loggingService,
+            IWebSocketRequestContextAccessor contextAccessor
         )
         {
             _applicationContext = applicationContext;
             _apiKey = configuration["ApiKey"] ?? string.Empty;
-            _httpClient = new HttpClient();
             _updateQueue = updateQueue;
-
-            if (!string.IsNullOrWhiteSpace(_apiKey))
-                _httpClient.DefaultRequestHeaders.Add("X-API-Key", _apiKey);
+            _loggingService = loggingService;
+            _contextAccessor = contextAccessor;
         }
 
-        private async Task SendAppFileStatus(int id, AppFileStatusTypes status, string message, string details)
+        private HttpClient CreateHttpClient(string? traceId = null)
+        {
+            var httpClient = new HttpClient();
+
+            if (!string.IsNullOrWhiteSpace(_apiKey))
+            {
+                httpClient.DefaultRequestHeaders.Add("X-API-Key", _apiKey);
+            }
+
+            if (!string.IsNullOrWhiteSpace(traceId))
+            {
+                httpClient.DefaultRequestHeaders.Add("X-Trace-Application-Id", traceId);
+            }
+
+            return httpClient;
+        }
+
+        private string? GetTraceId()
+        {
+            try
+            {
+                var context = _contextAccessor.Context;
+                if (context != null)
+                {
+                    var wsRequest = JsonSerializer.Deserialize<WebSocketRequest>(context.Request);
+                    if (wsRequest?.Headers != null && wsRequest.Headers.TryGetValue("X-Trace-Application-Id", out var traceIdValue))
+                    {
+                        return traceIdValue;
+                    }
+                }
+            }
+            catch { }
+            
+            return null;
+        }
+
+        private async Task SendAppFileStatus(int id, AppFileStatusTypes status, string message, string details, string? traceId = null)
         {
             var dto = new UpdateAppFileStatusRequestDto
             {
@@ -51,13 +91,14 @@ namespace Application.Services.AppFileWatcherService
 
             var json = JsonSerializer.Serialize(dto);
 
-            await _httpClient.PutAsync(
+            using var httpClient = CreateHttpClient(traceId);
+            await httpClient.PutAsync(
                 $"{_apiBaseUrl}/update-appfile-status",
                 new StringContent(json, Encoding.UTF8, "application/json")
             );
         }
 
-        private async Task SendAppStoredFileStatus(int id, AppStoredFileStatusTypes status, string message, string details)
+        private async Task SendAppStoredFileStatus(int id, AppStoredFileStatusTypes status, string message, string details, string? traceId = null)
         {
             var dto = new UpdateAppStoredFileStatusRequestDto
             {
@@ -69,7 +110,8 @@ namespace Application.Services.AppFileWatcherService
 
             var json = JsonSerializer.Serialize(dto);
 
-            await _httpClient.PutAsync(
+            using var httpClient = CreateHttpClient(traceId);
+            await httpClient.PutAsync(
                 $"{_apiBaseUrl}/update-appstoredfile-status",
                 new StringContent(json, Encoding.UTF8, "application/json")
             );
@@ -87,8 +129,13 @@ namespace Application.Services.AppFileWatcherService
                 }
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                _loggingService.SendErrorLogAsync(
+                    $"Directory not accessible: {path}. Error: {ex.Message}",
+                    "DirectoryAccessible",
+                    ex.StackTrace ?? ""
+                ).Wait();
                 return false;
             }
         }
@@ -99,7 +146,8 @@ namespace Application.Services.AppFileWatcherService
 
             try
             {
-                var response = _httpClient.GetAsync($"{_apiBaseUrl}/get-files").Result;
+                using var httpClient = CreateHttpClient();
+                var response = httpClient.GetAsync($"{_apiBaseUrl}/get-files").Result;
                 jsonResponse = response.Content.ReadAsStringAsync().Result;
 
                 var body = JsonSerializer.Deserialize<BaseResponse<List<AppFileResponseDto>>>(
@@ -155,7 +203,7 @@ namespace Application.Services.AppFileWatcherService
 
                             if (appFile.AutoValidateSync)
                             {
-                                await SendAppFileStatus(appFile.Id, AppFileStatusTypes.Unsynced,"Unsynced","");
+                                await this.SendAppFileStatus(appFile.Id, AppFileStatusTypes.Unsynced,"Unsynced","");
                             }
                         }
 
@@ -183,43 +231,50 @@ namespace Application.Services.AppFileWatcherService
             }
             catch (Exception ex)
             {
+                _loggingService.SendErrorLogAsync(
+                    $"Error in SetWatchers: {ex.Message}",
+                    "SetWatchers",
+                    jsonResponse + "\n" + ex.StackTrace
+                );
                 SendAppFileStatus(0, AppFileStatusTypes.Error, ex.Message, jsonResponse + ex.StackTrace).Wait();
             }
         }
 
         public async Task IsProcessing(AppFileStatusCheckRequestMessage body)
         {
+            var traceId = GetTraceId();
             var isInQueue = _updateQueue.Contains(e => e.AppStoredFileId == body.AppStoredFileId);
 
             if (!isInQueue)
             {
-                await this.SendAppStoredFileStatus(body.AppStoredFileId, AppStoredFileStatusTypes.Complete, "Complete", "The queue not contains file to be proccessed.");
+                await this.SendAppStoredFileStatus(body.AppStoredFileId, AppStoredFileStatusTypes.Complete, "Complete", "The queue not contains file to be proccessed.", traceId);
             }
             else if (!Directory.Exists(body.Path))
             {
-                await this.SendAppStoredFileStatus(body.AppStoredFileId, AppStoredFileStatusTypes.PendingWithError, "Path does not exist", body.Path);
+                await this.SendAppStoredFileStatus(body.AppStoredFileId, AppStoredFileStatusTypes.PendingWithError, "Path does not exist", body.Path, traceId);
             }
             else if (!DirectoryAccessible(body.Path))
             {
-                await this.SendAppStoredFileStatus(body.AppStoredFileId, AppStoredFileStatusTypes.PendingWithError, "Path locked or in use", body.Path);
+                await this.SendAppStoredFileStatus(body.AppStoredFileId, AppStoredFileStatusTypes.PendingWithError, "Path locked or in use", body.Path, traceId);
             }
         }
 
         public async Task ProcessSingleSync(int appStoredFileId, string path)
         {
             var jsonResponse = "";
+            var traceId = GetTraceId();
 
             try
             {
                 if (!Directory.Exists(path))
                 {
-                    await SendAppStoredFileStatus(appStoredFileId, AppStoredFileStatusTypes.Error, "Path does not exist", path);
+                    await SendAppStoredFileStatus(appStoredFileId, AppStoredFileStatusTypes.Error, "Path does not exist", path, traceId);
                     return;
                 }
 
                 if (!DirectoryAccessible(path))
                 {
-                    await SendAppStoredFileStatus(appStoredFileId, AppStoredFileStatusTypes.Error, "Path locked or in use", path);
+                    await SendAppStoredFileStatus(appStoredFileId, AppStoredFileStatusTypes.Error, "Path locked or in use", path, traceId);
                     return;
                 }
 
@@ -247,7 +302,8 @@ namespace Application.Services.AppFileWatcherService
 
                 content.Add(fileContent, "file", "archive.zip");
 
-                var response = await _httpClient.PostAsync(
+                using var httpClient = CreateHttpClient(traceId);
+                var response = await httpClient.PostAsync(
                     $"{_apiBaseUrl}/stream-file",
                     content
                 );
@@ -258,20 +314,27 @@ namespace Application.Services.AppFileWatcherService
             }
             catch (Exception ex)
             {
-                await SendAppStoredFileStatus(appStoredFileId, AppStoredFileStatusTypes.Error, ex.Message, jsonResponse + ex.StackTrace);
+                await _loggingService.SendErrorLogAsync(
+                    $"Error in ProcessSingleSync for AppStoredFileId {appStoredFileId}: {ex.Message}",
+                    "ProcessSingleSync",
+                    jsonResponse + "\n" + ex.StackTrace
+                );
+                await SendAppStoredFileStatus(appStoredFileId, AppStoredFileStatusTypes.Error, ex.Message, jsonResponse + ex.StackTrace, traceId);
             }
         }
 
         private async void RequestSync(int appFileId)
         {
             var jsonResponse = "";
+            var traceId = GetTraceId();
 
             try
             {
                 var body = new AppFileSyncRequestDto { IdAppFile = appFileId };
                 var json = JsonSerializer.Serialize(body);
 
-                var response = await _httpClient.PostAsync(
+                using var httpClient = CreateHttpClient(traceId);
+                var response = await httpClient.PostAsync(
                     $"{_apiBaseUrl}/request-sync",
                     new StringContent(json, Encoding.UTF8, "application/json")
                 );
@@ -282,7 +345,12 @@ namespace Application.Services.AppFileWatcherService
             }
             catch (Exception ex)
             {
-                await SendAppFileStatus(appFileId, AppFileStatusTypes.Error, ex.Message, jsonResponse + ex.StackTrace);
+                await _loggingService.SendErrorLogAsync(
+                    $"Error in RequestSync for AppFileId {appFileId}: {ex.Message}",
+                    "RequestSync",
+                    jsonResponse + "\n" + ex.StackTrace
+                );
+                await SendAppFileStatus(appFileId, AppFileStatusTypes.Error, ex.Message, jsonResponse + ex.StackTrace, traceId);
             }
         }
 
@@ -297,7 +365,14 @@ namespace Application.Services.AppFileWatcherService
                     var info = new FileInfo(file);
                     size += info.Length;
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _loggingService.SendErrorLogAsync(
+                        $"Error getting file size: {file}. Error: {ex.Message}",
+                        "GetDirectorySize",
+                        ex.StackTrace ?? ""
+                    ).Wait();
+                }
             }
 
             return size;

@@ -1,7 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Net;
-using Ws.Application.Workers;
+using System.Text.Json;
+using Web.Api.Toolkit.Ws.Application.Contexts;
+using Web.Api.Toolkit.Ws.Application.Dtos;
+using Web.Api.Toolkit.Ws.Application.Workers;
 
 namespace Application.Workers
 {
@@ -11,9 +15,9 @@ namespace Application.Workers
 
         public DriveWebSocketClientWorker(
             ILogger<DriveWebSocketClientWorker> logger,
-            IServiceProvider serviceProvider,
+            IServiceScopeFactory scopeFactory,
             IConfiguration configuration
-        ) : base(logger, TimeSpan.FromSeconds(5))
+        ) : base(logger, scopeFactory, TimeSpan.FromSeconds(5))
         {
             _configuration = configuration;
         }
@@ -49,5 +53,6 @@ namespace Application.Workers
         {
             return TimeSpan.FromSeconds(5);
         }
+
     }
 }
