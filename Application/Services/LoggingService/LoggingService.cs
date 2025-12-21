@@ -6,11 +6,12 @@ namespace Application.Services.LoggingService
 {
     public class LoggingService : ILoggingService
     {
-        private readonly string _apiBaseUrl = "https://localhost:7000";
+        private readonly string _apiBaseUrl;
         private readonly string _apiKey;
 
         public LoggingService(IConfiguration configuration)
         {
+            _apiBaseUrl = configuration["BackendApi:BaseUrl"] ?? "https://localhost:7000";
             _apiKey = configuration["ApiKey"] ?? string.Empty;
         }
 

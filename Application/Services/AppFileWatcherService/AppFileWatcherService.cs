@@ -22,7 +22,7 @@ namespace Application.Services.AppFileWatcherService
     public class AppFileWatcherService : IAppFileWatcherService
     {
         private readonly ApplicationContext _applicationContext;
-        private readonly string _apiBaseUrl = "https://localhost:7000";
+        private readonly string _apiBaseUrl;
         private readonly string _apiKey;
         private readonly IQueueService<AppFileProcessingQueueItem> _updateQueue;
         private readonly ILoggingService _loggingService;
@@ -38,6 +38,7 @@ namespace Application.Services.AppFileWatcherService
         {
             _applicationContext = applicationContext;
             _apiKey = configuration["ApiKey"] ?? string.Empty;
+            _apiBaseUrl = configuration["BackendApi:BaseUrl"] ?? "https://localhost:7000";
             _updateQueue = updateQueue;
             _loggingService = loggingService;
             _contextAccessor = contextAccessor;
