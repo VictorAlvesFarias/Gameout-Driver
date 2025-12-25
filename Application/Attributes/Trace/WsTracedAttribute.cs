@@ -22,7 +22,7 @@ namespace Application.Attributes.Trace
 
         public override Task OnActionExecutingAsync(WebSocketRequestContext req)
         {    
-            var logginService = (ILoggingService)req.Services.GetService(typeof(ILoggingService));
+            var logginService = (IUtilsService)req.Services.GetService(typeof(IUtilsService));
             
             try
             {
