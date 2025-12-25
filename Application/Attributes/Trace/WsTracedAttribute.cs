@@ -1,4 +1,5 @@
 ﻿using Application.Services.LoggingService;
+using Application.Types;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
@@ -32,9 +33,11 @@ namespace Application.Attributes.Trace
                     req.Error = true;
                     req.ErrorMessage = "Trace Id header is missing.";
 
-                    logginService.SendErrorLogAsync(
+                    logginService.LogAsync(
                         $"Trace Id header is missing.",
-                        "Error",
+                        ApplicationLogType.Message,
+                        ApplicationLogAction.Error,
+                        "",
                         ""
                     );
 
@@ -43,10 +46,12 @@ namespace Application.Attributes.Trace
             }
             catch (Exception ex)
             {
-                logginService.SendErrorLogAsync(
+                logginService.LogAsync(
                     $"Error in WsTracedAttribute",
-                    "Error",
-                    $"{ex.Message} : {ex.StackTrace}" ?? ""
+                    ApplicationLogType.Exception,
+                    ApplicationLogAction.Error,
+                    $"{ex.Message} : {ex.StackTrace}" ?? "",
+                    ""
                 );
 
                 req.Exception = ex;

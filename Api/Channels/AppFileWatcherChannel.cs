@@ -38,6 +38,13 @@ namespace Application.Channels
         {
             await _appFileWatcherService.IsProcessing(context);
         }
+
+        [WsTraced]
+        [WsAction("CheckAppFileStatusAll")]
+        public async Task CheckAppFileStatusAll(AppFileStatusCheckAllRequestMessage context)
+        {
+            await _appFileWatcherService.CheckAppFileStatusAll(context);
+        }
     }
 }
 

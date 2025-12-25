@@ -6,8 +6,6 @@ namespace Application.Dtos.AppFile
     {
         public int AppStoredFileId { get; set; }
         public AppStoredFileStatusTypes Status { get; set; }
-        public string StatusMessage { get; set; }
-        public string StatusDetails { get; set; }
         public int TraceId { get; set; }
     }
 }

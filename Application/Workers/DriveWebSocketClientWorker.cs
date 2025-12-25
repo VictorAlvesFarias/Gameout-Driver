@@ -6,6 +6,7 @@ using System.Text.Json;
 using Web.Api.Toolkit.Ws.Application.Contexts;
 using Web.Api.Toolkit.Ws.Application.Dtos;
 using Web.Api.Toolkit.Ws.Application.Workers;
+using Application.Dtos.WebSocket;
 
 namespace Application.Workers
 {
@@ -53,7 +54,7 @@ namespace Application.Workers
                 }
 
                 var content = await response.Content.ReadAsStringAsync();
-                var data = JsonSerializer.Deserialize<WebSocketConnectionResponse>(content, new JsonSerializerOptions 
+                var data = JsonSerializer.Deserialize<WebSocketConnectionResponseDto>(content, new JsonSerializerOptions 
                 { 
                     PropertyNameCaseInsensitive = true 
                 });
@@ -116,19 +117,6 @@ namespace Application.Workers
         protected override TimeSpan GetReconnectDelay()
         {
             return TimeSpan.FromSeconds(5);
-        }
-
-        private class WebSocketConnectionResponse
-        {
-            public bool Success { get; set; }
-            public WebSocketConnectionData? Data { get; set; }
-        }
-
-        private class WebSocketConnectionData
-        {
-            public string? Url { get; set; }
-            public string? Token { get; set; }
-            public DateTime ExpiresAt { get; set; }
         }
     }
 }

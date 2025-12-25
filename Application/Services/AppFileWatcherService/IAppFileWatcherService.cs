@@ -8,5 +8,6 @@ namespace Application.Services.AppFileWatcherService
         void SingleSync(AppFileUpdateRequestMessage req);
         Task ProcessSingleSync(AppFileProcessingQueueItem queueItem);
         Task IsProcessing(AppFileStatusCheckRequestMessage req);
+        Task CheckAppFileStatusAll(AppFileStatusCheckAllRequestMessage req);
     }
 }

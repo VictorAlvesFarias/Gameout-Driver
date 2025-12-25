@@ -23,7 +23,7 @@ builder.Services.AddHostedService(e =>
 });
 builder.Services.AddSingleton<ApplicationContext>();
 builder.Services.AddScoped<AppFileWatcherService>();
-builder.Services.AddSingleton<ILoggingService, LoggingService>();
+builder.Services.AddSingleton<IUtilsService, UtilsService>();
 
 // Registrar todos os WebSocket channels para o DriveWebSocketClientWorker
 // Cada worker pode ter seus próprios channels usando AddWebSocketChannels<TWorker>()

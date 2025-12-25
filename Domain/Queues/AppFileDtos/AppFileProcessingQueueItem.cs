@@ -6,6 +6,7 @@ namespace Domain.Queues.AppFileDtos
     public class AppFileProcessingQueueItem
     {
         public int AppStoredFileId { get; set; }
+        public int AppFileId { get; set; }
         public string Path { get; set; }
         public string? TraceId { get; set; }
     }
