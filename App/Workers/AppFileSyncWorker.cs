@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Web.Api.Toolkit.Queues.Application.Services;
 
-namespace Application.Workers
+namespace App.Workers
 {
     public class AppFileSyncWorker : BackgroundService
     {
@@ -22,14 +22,28 @@ namespace Application.Workers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            // Inicializar watchers ao iniciar a aplicação
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var appFileService = scope.ServiceProvider.GetRequiredService<IAppFileService>();
+                appFileService.SetWatchers();
+            }
+
             await foreach (var handle in _queue.DequeueWithHandleEnumerable(stoppingToken))
             {
                 using var scope = _serviceProvider.CreateScope();
-                var watcherService = scope.ServiceProvider.GetRequiredService<AppFileWatcherService>();
+                var workerService = scope.ServiceProvider.GetRequiredService<IAppFileWorkerService>();
 
-                await using (handle)
+                try
                 {
-                    await Task.Run(() => watcherService.ProcessSingleSync(handle.Item), stoppingToken);
+                    await using (handle)
+                    {
+                        await Task.Run(() => workerService.ProcessSingleSync(handle.Item), stoppingToken);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error: {ex.Message}");
                 }
             }
         }

@@ -8,7 +8,7 @@ using Web.Api.Toolkit.Ws.Application.Dtos;
 using Web.Api.Toolkit.Ws.Application.Workers;
 using Application.Dtos.WebSocket;
 
-namespace Application.Workers
+namespace App.Workers
 {
     public class DriveWebSocketClientWorker : WebSocketClientWorker
     {
@@ -93,7 +93,7 @@ namespace Application.Workers
 
         protected override CookieContainer GetCookies()
         {
-            var cookies = new CookieContainer();
+            var cookies = base.GetCookies();
 
             if (!string.IsNullOrWhiteSpace(_connectionUrl) && !string.IsNullOrWhiteSpace(_connectionToken))
             {
@@ -102,7 +102,6 @@ namespace Application.Workers
 
                 cookies.Add(uri, new Cookie("x-token-invite", _connectionToken));
                 cookies.Add(uri, new Cookie("type", "drive"));
-                cookies.Add(uri, new Cookie("id", userId));
 
                 _logger.LogDebug("Cookie x-token-invite adicionado para autenticação WebSocket");
             }
@@ -112,6 +111,29 @@ namespace Application.Workers
             }
 
             return cookies;
+        }
+
+        protected override Dictionary<string, string> GetHeaders()
+        {
+            var baseHeaders = base.GetHeaders();
+
+            baseHeaders.Add("X-API-Key", _apiKey);
+
+            var s = "";
+
+            foreach (var item in baseHeaders)
+            {
+                s += $"[{item.Key},{item.Value}]";
+            }
+
+            return baseHeaders;
+        }
+
+        protected override Task OnDisconnectedAsync()
+        {
+            MessageBox.Show("Conexão com o WebSocket do Drive perdida. Tentando reconectar...", "Conexão Perdida");   
+
+            return base.OnDisconnectedAsync();
         }
 
         protected override TimeSpan GetReconnectDelay()

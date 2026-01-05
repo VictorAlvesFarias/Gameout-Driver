@@ -19,8 +19,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Features" Version="6.0.36" />
-    <PackageReference Include="Web.Api.Toolkit.Entity.Infraestructure" Version="1.0.29" />
-    <PackageReference Include="Web.Api.Toolkit.Helpers.Infraestructure" Version="1.0.29" />
+    <PackageReference Include="Web.Api.Toolkit.Entity.Infraestructure" Version="1.0.30" />
+    <PackageReference Include="Web.Api.Toolkit.Helpers.Infraestructure" Version="1.0.30" />
   </ItemGroup>
 
   <ItemGroup>

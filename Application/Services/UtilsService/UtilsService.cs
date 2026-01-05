@@ -78,7 +78,7 @@ namespace Application.Services.LoggingService
 
             if (onCreate == false)
             {
-                throw new Exception("Trace is requested but is not marked with on create.");
+                return "";
             }
 
             using (var httpClient = CreateHttpClient())
