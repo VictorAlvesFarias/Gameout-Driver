@@ -11,6 +11,7 @@ namespace App.Services
         private NotifyIcon? _notifyIcon;
         private Thread? _uiThread;
         private readonly ManualResetEvent _initCompleted = new ManualResetEvent(false);
+        private readonly ManualResetEvent _shutdownCompleted = new ManualResetEvent(false);
 
         public SystemTrayHostedService(
             ILogger<SystemTrayHostedService> logger,
@@ -140,11 +141,15 @@ namespace App.Services
 
                     // Manter a thread viva para processar eventos do NotifyIcon
                     System.Windows.Forms.Application.Run();
+                    
+                    // Sinalizar que o shutdown foi concluído
+                    _shutdownCompleted.Set();
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Erro ao inicializar System Tray");
                     _initCompleted.Set();
+                    _shutdownCompleted.Set();
                 }
             })
             {
@@ -168,7 +173,37 @@ namespace App.Services
             if (_notifyIcon != null)
             {
                 _notifyIcon.Visible = false;
-                System.Windows.Forms.Application.ExitThread();
+                
+                // Encerrar o message loop da aplicação Windows Forms
+                if (_uiThread != null && _uiThread.IsAlive)
+                {
+                    System.Windows.Forms.Application.ExitThread();
+                    
+                    // Aguardar a thread encerrar com timeout de 5 segundos
+                    if (!_shutdownCompleted.WaitOne(TimeSpan.FromSeconds(5)))
+                    {
+                        _logger.LogWarning("Thread UI não encerrou no tempo esperado. Abortando thread...");
+                        
+                        // Como último recurso, abortar a thread (não recomendado, mas necessário)
+                        try
+                        {
+                            #pragma warning disable SYSLIB0006 // Thread.Abort é obsoleto mas necessário aqui
+                            if (_uiThread.IsAlive)
+                            {
+                                _uiThread.Interrupt();
+                            }
+                            #pragma warning restore SYSLIB0006
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Erro ao tentar interromper a thread UI");
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Thread UI encerrada com sucesso");
+                    }
+                }
             }
 
             return Task.CompletedTask;
@@ -183,6 +218,7 @@ namespace App.Services
             }
 
             _initCompleted?.Dispose();
+            _shutdownCompleted?.Dispose();
         }
     }
 }

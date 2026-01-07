@@ -140,5 +140,22 @@ namespace App.Workers
         {
             return TimeSpan.FromSeconds(5);
         }
+
+        public override async Task StopAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("DriveWebSocketClientWorker está parando. Fechando conexão WebSocket...");
+
+            try
+            {
+                // Chamar o método base que fecha a conexão WebSocket
+                await base.StopAsync(cancellationToken);
+                
+                _logger.LogInformation("Conexão WebSocket fechada com sucesso");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao parar DriveWebSocketClientWorker");
+            }
+        }
     }
 }

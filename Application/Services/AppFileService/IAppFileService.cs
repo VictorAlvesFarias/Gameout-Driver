@@ -2,7 +2,7 @@
 
 namespace Application.Services.AppFileWatcherService
 {
-    public interface IAppFileService
+    public interface IAppFileService : IDisposable
     {
         void SetWatchers();
         void SingleSync(AppFileUpdateRequestMessage req);

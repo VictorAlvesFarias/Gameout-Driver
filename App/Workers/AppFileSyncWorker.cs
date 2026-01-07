@@ -2,6 +2,7 @@ using Application.Services.AppFileWatcherService;
 using Domain.Queues.AppFileDtos;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Web.Api.Toolkit.Queues.Application.Services;
 
 namespace App.Workers
@@ -10,14 +11,17 @@ namespace App.Workers
     {
         private readonly IQueueService<AppFileProcessingQueueItem> _queue;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<AppFileSyncWorker> _logger;
 
         public AppFileSyncWorker(
             IQueueService<AppFileProcessingQueueItem> queue,
-            IServiceProvider serviceProvider
+            IServiceProvider serviceProvider,
+            ILogger<AppFileSyncWorker> logger
         )
         {
             _queue = queue;
             _serviceProvider = serviceProvider;
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -46,6 +50,31 @@ namespace App.Workers
                     MessageBox.Show($"Error: {ex.Message}");
                 }
             }
+        }
+
+        public override async Task StopAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("AppFileSyncWorker está parando. Liberando recursos...");
+
+            try
+            {
+                // Criar um scope para obter o AppFileService e liberar os watchers
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var appFileService = scope.ServiceProvider.GetRequiredService<IAppFileService>();
+                    
+                    // Dispor do service para liberar todos os FileSystemWatchers
+                    appFileService.Dispose();
+                    
+                    _logger.LogInformation("FileSystemWatchers liberados com sucesso");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao liberar recursos do AppFileSyncWorker");
+            }
+
+            await base.StopAsync(cancellationToken);
         }
     }
 }

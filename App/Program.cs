@@ -24,6 +24,12 @@ var host = Host.CreateDefaultBuilder(args)
     })
     .ConfigureServices((context, services) =>
     {
+        // Configurar timeout de shutdown para garantir que todos os serviços parem corretamente
+        services.Configure<HostOptions>(options =>
+        {
+            options.ShutdownTimeout = TimeSpan.FromSeconds(30);
+        });
+
         // Registrar filas - IQueueService é registrado automaticamente pelo pacote
         // mas precisamos garantir que está disponível
         services.AddSingleton(typeof(IQueueService<>), typeof(QueueService<>));

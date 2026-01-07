@@ -26,6 +26,7 @@ namespace Application.Services.AppFileWatcherService
         private readonly IQueueService<AppFileProcessingQueueItem> _updateQueue;
         private readonly IUtilsService _loggingService;
         private readonly IAppFileUtilsService _utilsService;
+        private bool _disposed = false;
 
         public AppFileService(
             ApplicationContext applicationContext,
@@ -331,6 +332,53 @@ namespace Application.Services.AppFileWatcherService
             }
 
             await _utilsService.SendAppFileStatus(body.AppFileId, AppFileStatusTypes.Synced, traceId);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                // Liberar todos os FileSystemWatchers
+                var watchers = _applicationContext.AppFileWatchers?.ToList();
+                if (watchers != null)
+                {
+                    foreach (var watcher in watchers)
+                    {
+                        try
+                        {
+                            if (watcher.FileSystemWatcher != null)
+                            {
+                                watcher.FileSystemWatcher.EnableRaisingEvents = false;
+                                watcher.FileSystemWatcher.Dispose();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log mas não interrompe o dispose de outros watchers
+                            var traceId = _loggingService.GetTraceId();
+                            _loggingService.LogAsync(
+                                $"Erro ao liberar FileSystemWatcher para AppFile {watcher.AppFileId}: {ex.Message}",
+                                ApplicationLogType.Exception,
+                                ApplicationLogAction.Error,
+                                ex.StackTrace,
+                                traceId
+                            ).Wait();
+                        }
+                    }
+                    _applicationContext.AppFileWatchers.Clear();
+                }
+            }
+
+            _disposed = true;
         }
     }
 }
