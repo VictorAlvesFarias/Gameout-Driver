@@ -29,10 +29,30 @@ namespace App.Services
             {
                 try
                 {
+                    // Carregar o ícone personalizado do arquivo
+                    Icon? customIcon = null;
+                    try
+                    {
+                        var iconPath = Path.Combine(AppContext.BaseDirectory, "app.ico");
+                        if (File.Exists(iconPath))
+                        {
+                            customIcon = new Icon(iconPath);
+                            _logger.LogInformation($"Ícone personalizado carregado de: {iconPath}");
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"Arquivo de ícone não encontrado em: {iconPath}. Usando ícone padrão.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Não foi possível carregar o ícone personalizado. Usando ícone padrão.");
+                    }
+
                     // Criar o NotifyIcon
                     _notifyIcon = new NotifyIcon
                     {
-                        Icon = SystemIcons.Application, // Ícone padrão do Windows
+                        Icon = customIcon ?? SystemIcons.Application, // Usa ícone personalizado ou padrão do Windows
                         Text = "Gameout Driver",
                         Visible = true
                     };
