@@ -55,10 +55,7 @@ var host = Host.CreateDefaultBuilder(args)
         
         services.AddHostedService<AppFileSyncWorker>();
 
-        // Registrar Auto-Start (deve ser antes do System Tray)
-        services.AddHostedService<AutoStartupService>();
-        
-        // Registrar System Tray
+        // Register System Tray (includes auto-start functionality)
         services.AddHostedService<SystemTrayHostedService>();
     })
     .Build();

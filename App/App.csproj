@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Web.Api.Toolkit.Helpers.Api" Version="1.0.30" />
+    <PackageReference Include="Web.Api.Toolkit.Helpers.Api" Version="1.0.43" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="6.0.1" />
   </ItemGroup>
@@ -24,9 +24,6 @@
 
   <ItemGroup>
     <None Update="app.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="appsettings.Development.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="appsettings.json">

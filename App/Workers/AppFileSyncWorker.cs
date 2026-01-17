@@ -26,16 +26,17 @@ namespace App.Workers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            // Inicializar watchers ao iniciar a aplicação
             using (var scope = _serviceProvider.CreateScope())
             {
                 var appFileService = scope.ServiceProvider.GetRequiredService<IAppFileService>();
+
                 appFileService.SetWatchers();
             }
 
             await foreach (var handle in _queue.DequeueWithHandleEnumerable(stoppingToken))
             {
                 using var scope = _serviceProvider.CreateScope();
+
                 var workerService = scope.ServiceProvider.GetRequiredService<IAppFileWorkerService>();
 
                 try
@@ -58,12 +59,10 @@ namespace App.Workers
 
             try
             {
-                // Criar um scope para obter o AppFileService e liberar os watchers
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var appFileService = scope.ServiceProvider.GetRequiredService<IAppFileService>();
                     
-                    // Dispor do service para liberar todos os FileSystemWatchers
                     appFileService.Dispose();
                     
                     _logger.LogInformation("FileSystemWatchers liberados com sucesso");

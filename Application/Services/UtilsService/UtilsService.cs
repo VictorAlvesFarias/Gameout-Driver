@@ -1,33 +1,42 @@
-using Application.Types;
 using Microsoft.Extensions.Configuration;
-using System.Text;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System.Net;
 using System.Text.Json;
-using Web.Api.Toolkit.Helpers.Application.Dtos;
 using Web.Api.Toolkit.Ws.Application.Contexts;
 using Web.Api.Toolkit.Ws.Application.Dtos;
+using Web.Api.Toolkit.Ws.Application.Workers;
+using System.Threading;
+using Application.Dtos;
+using Application.Configuration;
+using Web.Api.Toolkit.Helpers.Application.Dtos;
+using System;
+using System.Net.Sockets;
+using Application.Types;
+using System.Text;
 
 namespace Application.Services.LoggingService
 {
     public class UtilsService : IUtilsService
     {
-        private readonly string _apiBaseUrl;
-        private readonly string _apiKey;
+        private readonly IConfiguration _configuration;
         private readonly IWebSocketRequestContextAccessor _contextAccessor;
 
         public UtilsService(IConfiguration configuration, IWebSocketRequestContextAccessor contextAccessor)
         {
-            _apiBaseUrl = configuration["BackendApi:BaseUrl"] ?? "https://localhost:7000";
-            _apiKey = configuration["ApiKey"] ?? string.Empty;
             _contextAccessor = contextAccessor;
+            _configuration = configuration;
         }
 
         public HttpClient CreateHttpClient(string traceId = "")
         {
+            var backendConfiguration = _configuration.GetSection("BackendApi").Get<BackendApiConfiguration>();
+            var webSocketConfiguration = _configuration.GetSection("WebSocket").Get<WebSocketConfiguration>();
             var httpClient = new HttpClient();
 
-            if (!string.IsNullOrWhiteSpace(_apiKey))
+            if (!string.IsNullOrWhiteSpace(backendConfiguration.ApiKey))
             {
-                httpClient.DefaultRequestHeaders.Add("X-API-Key", _apiKey);
+                httpClient.DefaultRequestHeaders.Add("X-API-Key", backendConfiguration.ApiKey);
             }
 
             if (!string.IsNullOrWhiteSpace(traceId))
@@ -49,12 +58,12 @@ namespace Application.Services.LoggingService
                     Type = (int)type,
                     Action = (int)action
                 };
-
+                var backendConfiguration = _configuration.GetSection("BackendApi").Get<BackendApiConfiguration>();
                 var json = JsonSerializer.Serialize(logDto);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
                 using var httpClient = CreateHttpClient(traceId);
-                await httpClient.PostAsync($"{_apiBaseUrl}/api/application-log/add", content);
+                await httpClient.PostAsync($"{backendConfiguration.BaseUrl}/api/application-log/add", content);
             }
             catch
             {
@@ -83,7 +92,8 @@ namespace Application.Services.LoggingService
 
             using (var httpClient = CreateHttpClient())
             {
-                var response = httpClient.GetAsync($"{_apiBaseUrl}/get-trace-id").Result;
+                var backendConfiguration = _configuration.GetSection("BackendApi").Get<BackendApiConfiguration>();
+                var response = httpClient.GetAsync($"{backendConfiguration.BaseUrl}/get-trace-id").Result;
                 var jsonResponse = response.Content.ReadAsStringAsync().Result;
                 var body = JsonSerializer.Deserialize<BaseResponse<int>>(
                     jsonResponse,

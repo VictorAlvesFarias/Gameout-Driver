@@ -10,10 +10,11 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.1" />
-    <PackageReference Include="Web.Api.Toolkit.Helpers.Application" Version="1.0.30" />
-    <PackageReference Include="Web.Api.Toolkit.Identity.Application" Version="1.0.30" />
-    <PackageReference Include="Web.Api.Toolkit.Queues.Application" Version="1.0.30" />
-    <PackageReference Include="Web.Api.Toolkit.Ws.Application" Version="1.0.30" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
+    <PackageReference Include="Web.Api.Toolkit.Helpers.Application" Version="1.0.43" />
+    <PackageReference Include="Web.Api.Toolkit.Identity.Application" Version="1.0.43" />
+    <PackageReference Include="Web.Api.Toolkit.Queues.Application" Version="1.0.43" />
+    <PackageReference Include="Web.Api.Toolkit.Ws.Application" Version="1.0.43" />
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
     <PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
@@ -25,6 +26,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
 
 </Project>

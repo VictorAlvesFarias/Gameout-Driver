@@ -6,17 +6,18 @@ using System.Text.Json;
 using Web.Api.Toolkit.Ws.Application.Contexts;
 using Web.Api.Toolkit.Ws.Application.Dtos;
 using Web.Api.Toolkit.Ws.Application.Workers;
-using Application.Dtos.WebSocket;
+using System.Threading;
+using Application.Dtos;
+using Application.Configuration;
+using Web.Api.Toolkit.Helpers.Application.Dtos;
+using System;
+using System.Net.Sockets;
 
 namespace App.Workers
 {
     public class DriveWebSocketClientWorker : WebSocketClientWorker
     {
         private readonly IConfiguration _configuration;
-        private string _connectionUrl = string.Empty;
-        private string _connectionToken = string.Empty;
-        private readonly string _backendApiBaseUrl;
-        private readonly string _apiKey;
         private readonly ILogger<DriveWebSocketClientWorker> _logger;
 
         public DriveWebSocketClientWorker(
@@ -27,135 +28,67 @@ namespace App.Workers
         {
             _logger = logger;
             _configuration = configuration;
-            _backendApiBaseUrl = _configuration["BackendApi:BaseUrl"] ?? "https://localhost:7000";
-            _apiKey = _configuration["ApiKey"] ?? string.Empty;
+        }
+
+        public override async Task StopAsync(CancellationToken cancellationToken)
+        {
+            MessageBox.Show($"The process of connecting to the server has been completed.");
         }
 
         protected override async Task<string> GetUrlAsync()
         {
-            try
-            {
-                using var httpClient = new HttpClient();
-
-                if (!string.IsNullOrWhiteSpace(_apiKey))
-                {
-                    httpClient.DefaultRequestHeaders.Add("X-API-Key", _apiKey);
-                }
-
-                _logger.LogInformation("Solicitando token de conexão WebSocket do backend: {BackendUrl}", _backendApiBaseUrl);
-
-                var response = await httpClient.PostAsync($"{_backendApiBaseUrl}/api/websocket/connect", null);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    _logger.LogError("Falha ao obter token de conexão. Status: {StatusCode}", response.StatusCode);
-                    
-                    return string.Empty;
-                }
-
-                var content = await response.Content.ReadAsStringAsync();
-                var data = JsonSerializer.Deserialize<WebSocketConnectionResponseDto>(content, new JsonSerializerOptions 
-                { 
-                    PropertyNameCaseInsensitive = true 
-                });
-
-                if (data?.Success == true && data.Data != null)
-                {
-                    _connectionToken = data.Data.Token ?? string.Empty;
-                    var urlPath = data.Data.Url ?? "/ws";
-
-                    // Constrói a URL completa do WebSocket
-                    var backendUri = new Uri(_backendApiBaseUrl);
-                    var protocol = backendUri.Scheme == "https" ? "wss" : "ws";
-                    
-                    _connectionUrl = $"{protocol}://{backendUri.Host}:{backendUri.Port}{urlPath}";
-
-                    _logger.LogInformation(
-                        "Token de conexão WebSocket recebido com sucesso. URL: {Url}, Expira em: {ExpiresAt}", 
-                        _connectionUrl, 
-                        data.Data.ExpiresAt
-                    );
-
-                    return _connectionUrl;
-                }
-                else
-                {
-                    _logger.LogError("Resposta inválida do backend ao solicitar token de conexão");
-                    return string.Empty;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao solicitar token de conexão WebSocket");
-                return string.Empty;
-            }
+            var webSocketConfiguration = _configuration.GetSection("WebSocket").Get<WebSocketConfiguration>();
+                
+            return await Task.FromResult(webSocketConfiguration.Url);
         }
 
         protected override CookieContainer GetCookies()
         {
             var cookies = base.GetCookies();
-
-            if (!string.IsNullOrWhiteSpace(_connectionUrl) && !string.IsNullOrWhiteSpace(_connectionToken))
+            var webSocketConfiguration = _configuration.GetSection("WebSocket").Get<WebSocketConfiguration>();
+                
+            if (webSocketConfiguration == null || string.IsNullOrWhiteSpace(webSocketConfiguration.Url))
             {
-                var uri = new Uri(_connectionUrl);
-                var userId = _configuration["WebSocket:UserId"] ?? string.Empty;
-
-                cookies.Add(uri, new Cookie("x-token-invite", _connectionToken));
-                cookies.Add(uri, new Cookie("type", "drive"));
-
-                _logger.LogDebug("Cookie x-token-invite adicionado para autenticação WebSocket");
+                _logger.LogWarning("WebSocket configuration not found, cannot set cookies");
+                return cookies;
             }
-            else
-            {
-                _logger.LogWarning("Token de conexão não disponível. Cookies não foram adicionados.");
-            }
+
+            var uri = new Uri(webSocketConfiguration.Url);
+            cookies.Add(uri, new Cookie("type", "drive"));
 
             return cookies;
         }
 
         protected override Dictionary<string, string> GetHeaders()
         {
-            var baseHeaders = base.GetHeaders();
-
-            baseHeaders.Add("X-API-Key", _apiKey);
-
-            var s = "";
-
-            foreach (var item in baseHeaders)
+            var headers = base.GetHeaders();
+            var backendConfiguration = _configuration.GetSection("BackendApi").Get<BackendApiConfiguration>();
+                
+            if (backendConfiguration == null || string.IsNullOrWhiteSpace(backendConfiguration.ApiKey))
             {
-                s += $"[{item.Key},{item.Value}]";
+                _logger.LogError("BackendApi configuration not found or ApiKey is empty");
+                throw new InvalidOperationException("BackendApi configuration is missing or ApiKey is empty");
             }
 
-            return baseHeaders;
+            headers.Add("X-API-Key", backendConfiguration.ApiKey);
+                
+            return headers;
         }
 
-        protected override Task OnDisconnectedAsync()
+        protected override Task OnDisconnectedAsync(Exception ex)
         {
-            MessageBox.Show("Conexão com o WebSocket do Drive perdida. Tentando reconectar...", "Conexão Perdida");   
+            if (!this.ReconectRequest)
+            {
+                MessageBox.Show($"Connection lost with the server.");
+            }
 
-            return base.OnDisconnectedAsync();
+
+            return Task.CompletedTask;
         }
 
         protected override TimeSpan GetReconnectDelay()
         {
             return TimeSpan.FromSeconds(5);
-        }
-
-        public override async Task StopAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("DriveWebSocketClientWorker está parando. Fechando conexão WebSocket...");
-
-            try
-            {
-                // Chamar o método base que fecha a conexão WebSocket
-                await base.StopAsync(cancellationToken);
-                
-                _logger.LogInformation("Conexão WebSocket fechada com sucesso");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao parar DriveWebSocketClientWorker");
-            }
         }
     }
 }

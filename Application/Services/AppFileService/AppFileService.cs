@@ -1,4 +1,5 @@
-﻿using Application.Dtos;
+﻿using Application.Configuration;
+using Application.Dtos;
 using Application.Dtos.AppFile;
 using Application.Services.LoggingService;
 using Application.Types;
@@ -22,9 +23,9 @@ namespace Application.Services.AppFileWatcherService
     public class AppFileService : IAppFileService
     {
         private readonly ApplicationContext _applicationContext;
-        private readonly string _apiBaseUrl;
         private readonly IQueueService<AppFileProcessingQueueItem> _updateQueue;
         private readonly IUtilsService _loggingService;
+        private readonly IConfiguration _configuration;
         private readonly IAppFileUtilsService _utilsService;
         private bool _disposed = false;
 
@@ -38,10 +39,10 @@ namespace Application.Services.AppFileWatcherService
         )
         {
             _applicationContext = applicationContext;
-            _apiBaseUrl = configuration["BackendApi:BaseUrl"] ?? "https://localhost:7000";
             _updateQueue = updateQueue;
             _loggingService = loggingService;
             _utilsService = utilsService;
+            _configuration = configuration;
         }
 
 
@@ -78,10 +79,11 @@ namespace Application.Services.AppFileWatcherService
         {
             var traceId = _loggingService.GetTraceId();
             var jsonResponse = string.Empty;
+            var backendConfiguration = _configuration.GetSection("BackendApi").Get<BackendApiConfiguration>();
 
             using (var httpClient = _loggingService.CreateHttpClient(traceId))
             {
-                var response = httpClient.GetAsync($"{_apiBaseUrl}/get-files").Result;
+                var response = httpClient.GetAsync($"{backendConfiguration.BaseUrl}/get-files").Result;
 
                 jsonResponse = response.Content.ReadAsStringAsync().Result;
                     
@@ -203,11 +205,12 @@ namespace Application.Services.AppFileWatcherService
             {
                 var body = new AppFileSyncRequestDto { IdAppFile = appFileId };
                 var json = JsonSerializer.Serialize(body);
+                var backendConfiguration = _configuration.GetSection("BackendApi").Get<BackendApiConfiguration>();
 
                 using (var httpClient = _loggingService.CreateHttpClient(traceId))
                 {
                     var response = await httpClient.PostAsync(
-                        $"{_apiBaseUrl}/request-sync",
+                        $"{backendConfiguration.BaseUrl}/request-sync",
                         new StringContent(json, Encoding.UTF8, "application/json")
                     );
 
