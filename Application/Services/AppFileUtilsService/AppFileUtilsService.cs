@@ -46,40 +46,87 @@ namespace Application.Services.AppFileWatcherService
 
         public async Task SendAppFileStatus(int id, AppFileStatusTypes status, string traceId)
         {
-            var dto = new UpdateAppFileStatusRequestDto
+            try
             {
-                AppFileId = id,
-                Status = status
-            };
-            var json = JsonSerializer.Serialize(dto);
+                var dto = new UpdateAppFileStatusRequestDto
+                {
+                    AppFileId = id,
+                    Status = status
+                };
+                var json = JsonSerializer.Serialize(dto);
 
-            using (var httpClient = _loggingService.CreateHttpClient(traceId))
-            {
-                var response = await httpClient.PutAsync(
-                    $"{_apiBaseUrl}/update-appfile-status",
-                    new StringContent(json, Encoding.UTF8, "application/json")
-                );
-                var s = await response.Content.ReadAsStringAsync();
+                using (var httpClient = _loggingService.CreateHttpClient(traceId))
+                {
+                    var response = await httpClient.PutAsync(
+                        $"{_apiBaseUrl}/update-appfile-status",
+                        new StringContent(json, Encoding.UTF8, "application/json")
+                    );
+                    
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        await _loggingService.LogAsync(
+                            "Failed to update AppFile status",
+                            ApplicationLogType.Message,
+                            ApplicationLogAction.Error,
+                            $"AppFileId: {id}, Status: {status}, HTTP Status Code: {(int)response.StatusCode}, Response: {errorContent}",
+                            traceId
+                        );
+                    }
+                }
             }
-
+            catch (Exception ex)
+            {
+                await _loggingService.LogAsync(
+                    "Exception while updating AppFile status",
+                    ApplicationLogType.Exception,
+                    ApplicationLogAction.Error,
+                    $"AppFileId: {id}, Status: {status}, Exception Type: {ex.GetType().Name}, Message: {ex.Message}, StackTrace: {ex.StackTrace}",
+                    traceId
+                );
+            }
         }
 
         public async Task SendAppStoredFileStatus(int id, AppStoredFileStatusTypes status, string traceId)
         {
-            var dto = new UpdateAppStoredFileStatusRequestDto
+            try
             {
-                AppStoredFileId = id,
-                Status = status
-            };
-            var json = JsonSerializer.Serialize(dto);
+                var dto = new UpdateAppStoredFileStatusRequestDto
+                {
+                    AppStoredFileId = id,
+                    Status = status
+                };
+                var json = JsonSerializer.Serialize(dto);
 
-            using (var httpClient = _loggingService.CreateHttpClient(traceId))
+                using (var httpClient = _loggingService.CreateHttpClient(traceId))
+                {
+                    var response = await httpClient.PutAsync(
+                        $"{_apiBaseUrl}/update-appstoredfile-status",
+                        new StringContent(json, Encoding.UTF8, "application/json")
+                    );
+                    
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        await _loggingService.LogAsync(
+                            "Failed to update AppStoredFile status",
+                            ApplicationLogType.Message,
+                            ApplicationLogAction.Error,
+                            $"AppStoredFileId: {id}, Status: {status}, HTTP Status Code: {(int)response.StatusCode}, Response: {errorContent}",
+                            traceId
+                        );
+                    }
+                }
+            }
+            catch (Exception ex)
             {
-                var response = await httpClient.PutAsync(
-                    $"{_apiBaseUrl}/update-appstoredfile-status",
-                    new StringContent(json, Encoding.UTF8, "application/json")
+                await _loggingService.LogAsync(
+                    "Exception while updating AppStoredFile status",
+                    ApplicationLogType.Exception,
+                    ApplicationLogAction.Error,
+                    $"AppStoredFileId: {id}, Status: {status}, Exception Type: {ex.GetType().Name}, Message: {ex.Message}, StackTrace: {ex.StackTrace}",
+                    traceId
                 );
-                var s = await response.Content.ReadAsStringAsync();
             }
         }
     }

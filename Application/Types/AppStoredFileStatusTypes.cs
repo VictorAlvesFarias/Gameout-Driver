@@ -1,10 +1,25 @@
-﻿namespace Application.Types
+﻿using System.ComponentModel;
+
+namespace Application.Types
 {
     public enum AppStoredFileStatusTypes
     {
-        Processing = 1,
-        Error = 2,
+        [Description("Pending")]
+        Pending = 1,
+
+        [Description("Items in processing")]
+        Processing = 2,
+
+        [Description("Synced")]
         Complete = 3,
-        PendingWithError = 4
+
+        [Description("Error during processing")]
+        Error = 4,
+
+        [Description("Path not founded")]
+        PathNotFounded = 5,
+
+        [Description("Locked files")]
+        LockedFiles = 6
     }
 }

@@ -64,10 +64,10 @@ namespace Application.Services.AppFileWatcherService
             catch (Exception ex)
             {
                 _loggingService.LogAsync(
-                    $"Directory not accessible: {path}. Error: {ex.Message}",
+                    "Directory not accessible",
                     ApplicationLogType.Exception,
                     ApplicationLogAction.Error,
-                    ex.StackTrace,
+                    $"Path: {path}, Exception Type: {ex.GetType().Name}, Message: {ex.Message}, StackTrace: {ex.StackTrace}",
                     traceId
 
                 ).Wait();
@@ -81,13 +81,37 @@ namespace Application.Services.AppFileWatcherService
             var jsonResponse = string.Empty;
             var backendConfiguration = _configuration.GetSection("BackendApi").Get<BackendApiConfiguration>();
 
-            using (var httpClient = _loggingService.CreateHttpClient(traceId))
+            try
             {
-                var response = httpClient.GetAsync($"{backendConfiguration.BaseUrl}/get-files").Result;
+                using (var httpClient = _loggingService.CreateHttpClient(traceId))
+                {
+                    var response = httpClient.GetAsync($"{backendConfiguration.BaseUrl}/get-files").Result;
 
-                jsonResponse = response.Content.ReadAsStringAsync().Result;
+                    jsonResponse = response.Content.ReadAsStringAsync().Result;
                     
-                response.EnsureSuccessStatusCode();
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        await _loggingService.LogAsync(
+                            "Failed to fetch files from backend",
+                            ApplicationLogType.Message,
+                            ApplicationLogAction.Error,
+                            $"HTTP Status Code: {(int)response.StatusCode}, Response: {jsonResponse}",
+                            traceId
+                        );
+                        return;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await _loggingService.LogAsync(
+                    "Exception while fetching files from backend",
+                    ApplicationLogType.Exception,
+                    ApplicationLogAction.Error,
+                    $"Exception Type: {ex.GetType().Name}, Message: {ex.Message}, StackTrace: {ex.StackTrace}",
+                    traceId
+                );
+                return;
             }
 
             var body = JsonSerializer.Deserialize<BaseResponse<List<AppFileResponseDto>>>(
@@ -111,6 +135,13 @@ namespace Application.Services.AppFileWatcherService
 
                 if (!Directory.Exists(appFile.Path))
                 {
+                    await _loggingService.LogAsync(
+                        "Path not found during watcher setup",
+                        ApplicationLogType.Message,
+                        ApplicationLogAction.Error,
+                        $"AppFileId: {appFile.Id}, Path: {appFile.Path}",
+                        traceId
+                    );
                     _utilsService.SendAppFileStatus(appFile.Id, AppFileStatusTypes.Unsynced, traceId).Wait();
 
                     continue;
@@ -118,6 +149,13 @@ namespace Application.Services.AppFileWatcherService
 
                 if (!DirectoryAccessible(appFile.Path))
                 {
+                    await _loggingService.LogAsync(
+                        "Directory not accessible (locked files) during watcher setup",
+                        ApplicationLogType.Message,
+                        ApplicationLogAction.Error,
+                        $"AppFileId: {appFile.Id}, Path: {appFile.Path}",
+                        traceId
+                    );
                     _utilsService.SendAppFileStatus(appFile.Id, AppFileStatusTypes.Unsynced, traceId).Wait();
 
                     continue;
@@ -139,6 +177,13 @@ namespace Application.Services.AppFileWatcherService
 
                     if (!this.DirectoryAccessible(appFile.Path))
                     {
+                        await _loggingService.LogAsync(
+                            "Directory not accessible detected by watcher",
+                            ApplicationLogType.Message,
+                            ApplicationLogAction.Warning,
+                            $"AppFileId: {appFile.Id}, Path: {appFile.Path}",
+                            traceId
+                        );
                         this._utilsService.SendAppFileStatus(appFile.Id, AppFileStatusTypes.Unsynced, traceId).Wait();
                     }
                     else
@@ -188,11 +233,25 @@ namespace Application.Services.AppFileWatcherService
             }
             else if (!Directory.Exists(body.Path))
             {
-                await this._utilsService.SendAppStoredFileStatus(body.AppStoredFileId, AppStoredFileStatusTypes.PendingWithError, traceId);
+                await _loggingService.LogAsync(
+                    "Path not found during status check",
+                    ApplicationLogType.Message,
+                    ApplicationLogAction.Error,
+                    $"AppStoredFileId: {body.AppStoredFileId}, Path: {body.Path}",
+                    traceId
+                );
+                await this._utilsService.SendAppStoredFileStatus(body.AppStoredFileId, AppStoredFileStatusTypes.PathNotFounded, traceId);
             }
             else if (!DirectoryAccessible(body.Path))
             {
-                await this._utilsService.SendAppStoredFileStatus(body.AppStoredFileId, AppStoredFileStatusTypes.PendingWithError, traceId);
+                await _loggingService.LogAsync(
+                    "Locked files detected during status check",
+                    ApplicationLogType.Message,
+                    ApplicationLogAction.Error,
+                    $"AppStoredFileId: {body.AppStoredFileId}, Path: {body.Path}",
+                    traceId
+                );
+                await this._utilsService.SendAppStoredFileStatus(body.AppStoredFileId, AppStoredFileStatusTypes.LockedFiles, traceId);
             }
         }
 
@@ -216,17 +275,28 @@ namespace Application.Services.AppFileWatcherService
 
                     jsonResponse = await response.Content.ReadAsStringAsync();
 
-                    response.EnsureSuccessStatusCode();
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        await _loggingService.LogAsync(
+                            "Failed to request synchronization",
+                            ApplicationLogType.Message,
+                            ApplicationLogAction.Error,
+                            $"AppFileId: {appFileId}, HTTP Status Code: {(int)response.StatusCode}, Response: {jsonResponse}",
+                            traceId
+                        );
+                        await _utilsService.SendAppFileStatus(appFileId, AppFileStatusTypes.Unsynced, traceId);
+                        return;
+                    }
                 }
 
             }
             catch (Exception ex)
             {
                 await _loggingService.LogAsync(
-                    $"Error in RequestSync for AppFileId {appFileId}: {ex.Message}",
+                    "Exception during synchronization request",
                     ApplicationLogType.Exception,
                     ApplicationLogAction.Error,
-                    jsonResponse + "\n" + ex.StackTrace,
+                    $"AppFileId: {appFileId}, Exception Type: {ex.GetType().Name}, Message: {ex.Message}, Response: {jsonResponse}, StackTrace: {ex.StackTrace}",
                     traceId
                 );
                 await _utilsService.SendAppFileStatus(appFileId, AppFileStatusTypes.Unsynced, traceId);
@@ -247,10 +317,10 @@ namespace Application.Services.AppFileWatcherService
                 catch (Exception ex)
                 {
                     _loggingService.LogAsync(
-                        $"Error getting file size: {file}. Error: {ex.Message}",
+                        "Error getting file size",
                         ApplicationLogType.Exception,
                         ApplicationLogAction.Error,
-                        ex.StackTrace ?? "",
+                        $"File: {file}, Exception Type: {ex.GetType().Name}, Message: {ex.Message}, StackTrace: {ex.StackTrace}",
                         ""
                     ).Wait();
                 }
@@ -280,7 +350,8 @@ namespace Application.Services.AppFileWatcherService
 
             if (hasFilesInProcessing)
             {
-                await _utilsService.SendAppFileStatus(body.AppFileId, AppFileStatusTypes.InProgress, traceId);
+                await _utilsService.SendAppFileStatus(body.AppFileId, AppFileStatusTypes.Processing, traceId);
+                return;
             }
 
             DateTime? mostRecentDate = null;
@@ -301,7 +372,14 @@ namespace Application.Services.AppFileWatcherService
                 }
                 else
                 {
-                    await _utilsService.SendAppFileStatus(body.AppFileId, AppFileStatusTypes.Unsynced, traceId);
+                    await _loggingService.LogAsync(
+                        "Path not found during status check",
+                        ApplicationLogType.Message,
+                        ApplicationLogAction.Error,
+                        $"AppFileId: {body.AppFileId}, Path: {body.Path}",
+                        traceId
+                    );
+                    await _utilsService.SendAppFileStatus(body.AppFileId, AppFileStatusTypes.PathNotFounded, traceId);
 
                     return;
                 }
@@ -309,10 +387,10 @@ namespace Application.Services.AppFileWatcherService
             catch (Exception ex)
             {
                 await _loggingService.LogAsync(
-                    $"Error calculating folder stats for path {body.Path}",
+                    "Exception while calculating folder statistics",
                     ApplicationLogType.Exception,
                     ApplicationLogAction.Warning,
-                    ex.Message,
+                    $"AppFileId: {body.AppFileId}, Path: {body.Path}, Exception Type: {ex.GetType().Name}, Message: {ex.Message}, StackTrace: {ex.StackTrace}",
                     traceId
                 );
 
