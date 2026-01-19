@@ -75,6 +75,54 @@ namespace Application.Services.AppFileWatcherService
             }
         }
 
+        private async void RequestSync(int appFileId)
+        {
+            var traceId = _loggingService.GetTraceId(true);
+            var jsonResponse = string.Empty;
+
+            try
+            {
+                var body = new AppFileSyncRequestDto { IdAppFile = appFileId };
+                var json = JsonSerializer.Serialize(body);
+                var backendConfiguration = _configuration.GetSection("BackendApi").Get<BackendApiConfiguration>();
+
+                using (var httpClient = _loggingService.CreateHttpClient(traceId))
+                {
+                    var response = await httpClient.PostAsync(
+                        $"{backendConfiguration.BaseUrl}/request-sync",
+                        new StringContent(json, Encoding.UTF8, "application/json")
+                    );
+
+                    jsonResponse = await response.Content.ReadAsStringAsync();
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        await _loggingService.LogAsync(
+                            "Failed to request synchronization",
+                            ApplicationLogType.Message,
+                            ApplicationLogAction.Error,
+                            $"AppFileId: {appFileId}, HTTP Status Code: {(int)response.StatusCode}, Response: {jsonResponse}",
+                            traceId
+                        );
+                        await _utilsService.SendAppFileStatus(appFileId, AppFileStatusTypes.Unsynced, traceId);
+                        return;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                await _loggingService.LogAsync(
+                    "Exception during synchronization request",
+                    ApplicationLogType.Exception,
+                    ApplicationLogAction.Error,
+                    $"AppFileId: {appFileId}, Exception Type: {ex.GetType().Name}, Message: {ex.Message}, Response: {jsonResponse}, StackTrace: {ex.StackTrace}",
+                    traceId
+                );
+                await _utilsService.SendAppFileStatus(appFileId, AppFileStatusTypes.Unsynced, traceId);
+            }
+        }
+
         public async void SetWatchers()
         {
             var traceId = _loggingService.GetTraceId();
@@ -125,7 +173,6 @@ namespace Application.Services.AppFileWatcherService
             {
                 var watcher = watchers.FirstOrDefault(e => e.AppFileId == appFile.Id);
 
-                // Se o watcher já existe, remove o antigo para substituir pelo novo
                 if (watcher is not null)
                 {
                     watcher.FileSystemWatcher?.Dispose();
@@ -142,7 +189,6 @@ namespace Application.Services.AppFileWatcherService
                         $"AppFileId: {appFile.Id}, Path: {appFile.Path}",
                         traceId
                     );
-                    _utilsService.SendAppFileStatus(appFile.Id, AppFileStatusTypes.Unsynced, traceId).Wait();
 
                     continue;
                 }
@@ -156,7 +202,6 @@ namespace Application.Services.AppFileWatcherService
                         $"AppFileId: {appFile.Id}, Path: {appFile.Path}",
                         traceId
                     );
-                    _utilsService.SendAppFileStatus(appFile.Id, AppFileStatusTypes.Unsynced, traceId).Wait();
 
                     continue;
                 }
@@ -175,6 +220,20 @@ namespace Application.Services.AppFileWatcherService
 
                     watcher.FileSystemWatcher.EnableRaisingEvents = false;
 
+                    if (!Directory.Exists(appFile.Path))
+                    {
+                        await _loggingService.LogAsync(
+                            "Path not found during watcher setup",
+                            ApplicationLogType.Message,
+                            ApplicationLogAction.Error,
+                            $"AppFileId: {appFile.Id}, Path: {appFile.Path}",
+                            traceId
+                        );
+
+                        watcher.FileSystemWatcher?.Dispose();
+                        _applicationContext.AppFileWatchers.Remove(watcher);
+                    }
+
                     if (!this.DirectoryAccessible(appFile.Path))
                     {
                         await _loggingService.LogAsync(
@@ -184,7 +243,9 @@ namespace Application.Services.AppFileWatcherService
                             $"AppFileId: {appFile.Id}, Path: {appFile.Path}",
                             traceId
                         );
-                        this._utilsService.SendAppFileStatus(appFile.Id, AppFileStatusTypes.Unsynced, traceId).Wait();
+
+                        watcher.FileSystemWatcher?.Dispose();
+                        _applicationContext.AppFileWatchers.Remove(watcher);
                     }
                     else
                     {
@@ -255,94 +316,6 @@ namespace Application.Services.AppFileWatcherService
             }
         }
 
-        private async void RequestSync(int appFileId)
-        {
-            var traceId = _loggingService.GetTraceId(true);
-            var jsonResponse = string.Empty;
-
-            try
-            {
-                var body = new AppFileSyncRequestDto { IdAppFile = appFileId };
-                var json = JsonSerializer.Serialize(body);
-                var backendConfiguration = _configuration.GetSection("BackendApi").Get<BackendApiConfiguration>();
-
-                using (var httpClient = _loggingService.CreateHttpClient(traceId))
-                {
-                    var response = await httpClient.PostAsync(
-                        $"{backendConfiguration.BaseUrl}/request-sync",
-                        new StringContent(json, Encoding.UTF8, "application/json")
-                    );
-
-                    jsonResponse = await response.Content.ReadAsStringAsync();
-
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        await _loggingService.LogAsync(
-                            "Failed to request synchronization",
-                            ApplicationLogType.Message,
-                            ApplicationLogAction.Error,
-                            $"AppFileId: {appFileId}, HTTP Status Code: {(int)response.StatusCode}, Response: {jsonResponse}",
-                            traceId
-                        );
-                        await _utilsService.SendAppFileStatus(appFileId, AppFileStatusTypes.Unsynced, traceId);
-                        return;
-                    }
-                }
-
-            }
-            catch (Exception ex)
-            {
-                await _loggingService.LogAsync(
-                    "Exception during synchronization request",
-                    ApplicationLogType.Exception,
-                    ApplicationLogAction.Error,
-                    $"AppFileId: {appFileId}, Exception Type: {ex.GetType().Name}, Message: {ex.Message}, Response: {jsonResponse}, StackTrace: {ex.StackTrace}",
-                    traceId
-                );
-                await _utilsService.SendAppFileStatus(appFileId, AppFileStatusTypes.Unsynced, traceId);
-            }
-        }
-
-        public long GetDirectorySize(IEnumerable<string> files)
-        {
-            long size = 0;
-
-            foreach (var file in files)
-            {
-                try
-                {
-                    var info = new FileInfo(file);
-                    size += info.Length;
-                }
-                catch (Exception ex)
-                {
-                    _loggingService.LogAsync(
-                        "Error getting file size",
-                        ApplicationLogType.Exception,
-                        ApplicationLogAction.Error,
-                        $"File: {file}, Exception Type: {ex.GetType().Name}, Message: {ex.Message}, StackTrace: {ex.StackTrace}",
-                        ""
-                    ).Wait();
-                }
-            }
-
-            return size;
-        }
-
-        public void SingleSync(AppFileUpdateRequestMessage body)
-        {
-            var traceId = _loggingService.GetTraceId();
-            var queueItem = new AppFileProcessingQueueItem
-            {
-                AppStoredFileId = body.AppStoredFileId,
-                AppFileId = body.AppFileId,
-                Path = body.Path,
-                TraceId = traceId
-            };
-
-            _updateQueue.EnqueueAsync(queueItem);
-        }
-
         public async Task CheckAppFileStatusAll(AppFileStatusCheckAllRequestMessage body)
         {
             var traceId = _loggingService.GetTraceId();
@@ -399,13 +372,13 @@ namespace Application.Services.AppFileWatcherService
                 return;
             }
 
-            if (body.LastSyncedFileSize.HasValue && body.LastSyncedFileSize.Value != currentFolderSize)
+            if (body.LastSyncedFileSize != currentFolderSize)
             {
                 await _utilsService.SendAppFileStatus(body.AppFileId, AppFileStatusTypes.Unsynced, traceId);
 
                 return;
             }
-            else if (body.LastSyncedFileDate.HasValue && mostRecentDate.HasValue && mostRecentDate.Value > body.LastSyncedFileDate.Value)
+            else if (body.LastSyncedFileDate < mostRecentDate)
             {
                 await _utilsService.SendAppFileStatus(body.AppFileId, AppFileStatusTypes.Unsynced, traceId);
 
@@ -413,6 +386,46 @@ namespace Application.Services.AppFileWatcherService
             }
 
             await _utilsService.SendAppFileStatus(body.AppFileId, AppFileStatusTypes.Synced, traceId);
+        }
+
+        public long GetDirectorySize(IEnumerable<string> files)
+        {
+            long size = 0;
+
+            foreach (var file in files)
+            {
+                try
+                {
+                    var info = new FileInfo(file);
+                    size += info.Length;
+                }
+                catch (Exception ex)
+                {
+                    _loggingService.LogAsync(
+                        "Error getting file size",
+                        ApplicationLogType.Exception,
+                        ApplicationLogAction.Error,
+                        $"File: {file}, Exception Type: {ex.GetType().Name}, Message: {ex.Message}, StackTrace: {ex.StackTrace}",
+                        ""
+                    ).Wait();
+                }
+            }
+
+            return size;
+        }
+
+        public void SingleSync(AppFileUpdateRequestMessage body)
+        {
+            var traceId = _loggingService.GetTraceId();
+            var queueItem = new AppFileProcessingQueueItem
+            {
+                AppStoredFileId = body.AppStoredFileId,
+                AppFileId = body.AppFileId,
+                Path = body.Path,
+                TraceId = traceId
+            };
+
+            _updateQueue.EnqueueAsync(queueItem);
         }
 
         public void Dispose()
