@@ -27,7 +27,6 @@ namespace Application.Services.AppFileWatcherService
         private readonly IUtilsService _loggingService;
         private readonly IConfiguration _configuration;
         private readonly IAppFileUtilsService _utilsService;
-        private bool _disposed = false;
 
         public AppFileService(
             ApplicationContext applicationContext,
@@ -167,17 +166,22 @@ namespace Application.Services.AppFileWatcherService
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
             );
 
-            var watchers = _applicationContext.AppFileWatchers;
+            foreach (var oldWatcher in _applicationContext.AppFileWatchers)
+            {
+                if (oldWatcher.FileSystemWatcher != null)
+                {
+                    oldWatcher.FileSystemWatcher.EnableRaisingEvents = false;
+                    oldWatcher.FileSystemWatcher.Dispose();
+                }
+            }
+
+            _applicationContext.AppFileWatchers.Clear();
 
             foreach (var appFile in body.Data)
             {
-                var watcher = watchers.FirstOrDefault(e => e.AppFileId == appFile.Id);
-
-                if (watcher is not null)
+                if (!appFile.Observer && !appFile.AutoValidateSync)
                 {
-                    watcher.FileSystemWatcher?.Dispose();
-                    _applicationContext.AppFileWatchers.Remove(watcher);
-                    watcher = null;
+                    continue;
                 }
 
                 if (!Directory.Exists(appFile.Path))
@@ -206,14 +210,14 @@ namespace Application.Services.AppFileWatcherService
                     continue;
                 }
 
-                watcher = new AppFileWatcher { AppFileId = appFile.Id };
+                var watcher = new AppFileWatcher();
 
+                watcher.AppFileId = appFile.Id;
                 watcher.FileSystemWatcher = new FileSystemWatcher(appFile.Path)
                 {
                     IncludeSubdirectories = true,
                     EnableRaisingEvents = true
                 };
-
                 watcher.FileSystemWatcher.Changed += async (s, e) =>
                 {
                     var traceId = _loggingService.GetTraceId(true);
@@ -249,14 +253,14 @@ namespace Application.Services.AppFileWatcherService
                     }
                     else
                     {
-                        if (appFile.Observer)
-                        {
-                            this.RequestSync(appFile.Id);
-                        }
-
                         if (appFile.AutoValidateSync)
                         {
                             await this._utilsService.SendAppFileStatus(appFile.Id, AppFileStatusTypes.Unsynced, traceId);
+                        }
+
+                        if (appFile.Observer)
+                        {
+                            this.RequestSync(appFile.Id);
                         }
                     }
 
@@ -268,29 +272,27 @@ namespace Application.Services.AppFileWatcherService
 
                 _applicationContext.AppFileWatchers.Add(watcher);
             }
-
-            var idsToRemove = watchers
-                .Where(w => !body.Data.Any(a => a.Id == w.AppFileId))
-                .Select(w => w.AppFileId)
-                .ToList();
-
-            foreach (var id in idsToRemove)
-            {
-                var watcher = watchers.First(w => w.AppFileId == id);
-                watcher.FileSystemWatcher.EnableRaisingEvents = false;
-                watcher.FileSystemWatcher.Dispose();
-                watchers.Remove(watcher);
-            }
         }
 
-        public async Task IsProcessing(AppFileStatusCheckRequestMessage body)
+        public async Task CheckStatus(AppFileStatusCheckRequestMessage body)
         {
             var traceId = _loggingService.GetTraceId();
-            var isInQueue = _updateQueue.Contains(e => e.AppStoredFileId == body.AppStoredFileId);
+            var itemInQueue = _updateQueue.Contains(e => e.AppFileId == body.AppFileId);
 
-            if (!isInQueue)
+            if (itemInQueue)
             {
-                await this._utilsService.SendAppStoredFileStatus(body.AppStoredFileId, AppStoredFileStatusTypes.Complete, traceId);
+                if (_applicationContext.CurrentAppFileProcessingQueueItem?.AppFileId == body.AppFileId)
+                {
+                    await this._utilsService.SendAppFileStatus(body.AppFileId, AppFileStatusTypes.Processing, traceId);
+
+                    return;
+                }
+                else
+                {
+                    await this._utilsService.SendAppFileStatus(body.AppFileId, AppFileStatusTypes.Pending, traceId);
+
+                    return;
+                }
             }
             else if (!Directory.Exists(body.Path))
             {
@@ -298,10 +300,13 @@ namespace Application.Services.AppFileWatcherService
                     "Path not found during status check",
                     ApplicationLogType.Message,
                     ApplicationLogAction.Error,
-                    $"AppStoredFileId: {body.AppStoredFileId}, Path: {body.Path}",
+                    $"AppFileId: {body.AppFileId}, Path: {body.Path}",
                     traceId
                 );
-                await this._utilsService.SendAppStoredFileStatus(body.AppStoredFileId, AppStoredFileStatusTypes.PathNotFounded, traceId);
+
+                await this._utilsService.SendAppFileStatus(body.AppFileId, AppFileStatusTypes.PathNotFounded, traceId);
+
+                return;
             }
             else if (!DirectoryAccessible(body.Path))
             {
@@ -309,10 +314,13 @@ namespace Application.Services.AppFileWatcherService
                     "Locked files detected during status check",
                     ApplicationLogType.Message,
                     ApplicationLogAction.Error,
-                    $"AppStoredFileId: {body.AppStoredFileId}, Path: {body.Path}",
+                    $"AppFileId: {body.AppFileId}, Path: {body.Path}",
                     traceId
                 );
-                await this._utilsService.SendAppStoredFileStatus(body.AppStoredFileId, AppStoredFileStatusTypes.LockedFiles, traceId);
+
+                await this._utilsService.SendAppFileStatus(body.AppFileId, AppFileStatusTypes.LockedFiles, traceId);
+
+                return;
             }
         }
 
@@ -417,9 +425,15 @@ namespace Application.Services.AppFileWatcherService
         public void SingleSync(AppFileUpdateRequestMessage body)
         {
             var traceId = _loggingService.GetTraceId();
+            var itemInQueue = _updateQueue.Contains(e => e.AppFileId == body.AppFileId);
+
+            if (itemInQueue)
+            {
+                return;
+            }
+
             var queueItem = new AppFileProcessingQueueItem
             {
-                AppStoredFileId = body.AppStoredFileId,
                 AppFileId = body.AppFileId,
                 Path = body.Path,
                 TraceId = traceId
@@ -430,49 +444,7 @@ namespace Application.Services.AppFileWatcherService
 
         public void Dispose()
         {
-            Dispose(true);
             GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed)
-                return;
-
-            if (disposing)
-            {
-                // Liberar todos os FileSystemWatchers
-                var watchers = _applicationContext.AppFileWatchers?.ToList();
-                if (watchers != null)
-                {
-                    foreach (var watcher in watchers)
-                    {
-                        try
-                        {
-                            if (watcher.FileSystemWatcher != null)
-                            {
-                                watcher.FileSystemWatcher.EnableRaisingEvents = false;
-                                watcher.FileSystemWatcher.Dispose();
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            // Log mas não interrompe o dispose de outros watchers
-                            var traceId = _loggingService.GetTraceId();
-                            _loggingService.LogAsync(
-                                $"Erro ao liberar FileSystemWatcher para AppFile {watcher.AppFileId}: {ex.Message}",
-                                ApplicationLogType.Exception,
-                                ApplicationLogAction.Error,
-                                ex.StackTrace,
-                                traceId
-                            ).Wait();
-                        }
-                    }
-                    _applicationContext.AppFileWatchers.Clear();
-                }
-            }
-
-            _disposed = true;
         }
     }
 }

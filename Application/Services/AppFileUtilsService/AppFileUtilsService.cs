@@ -86,48 +86,5 @@ namespace Application.Services.AppFileWatcherService
                 );
             }
         }
-
-        public async Task SendAppStoredFileStatus(int id, AppStoredFileStatusTypes status, string traceId)
-        {
-            try
-            {
-                var dto = new UpdateAppStoredFileStatusRequestDto
-                {
-                    AppStoredFileId = id,
-                    Status = status
-                };
-                var json = JsonSerializer.Serialize(dto);
-
-                using (var httpClient = _loggingService.CreateHttpClient(traceId))
-                {
-                    var response = await httpClient.PutAsync(
-                        $"{_apiBaseUrl}/update-appstoredfile-status",
-                        new StringContent(json, Encoding.UTF8, "application/json")
-                    );
-                    
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        var errorContent = await response.Content.ReadAsStringAsync();
-                        await _loggingService.LogAsync(
-                            "Failed to update AppStoredFile status",
-                            ApplicationLogType.Message,
-                            ApplicationLogAction.Error,
-                            $"AppStoredFileId: {id}, Status: {status}, HTTP Status Code: {(int)response.StatusCode}, Response: {errorContent}",
-                            traceId
-                        );
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                await _loggingService.LogAsync(
-                    "Exception while updating AppStoredFile status",
-                    ApplicationLogType.Exception,
-                    ApplicationLogAction.Error,
-                    $"AppStoredFileId: {id}, Status: {status}, Exception Type: {ex.GetType().Name}, Message: {ex.Message}, StackTrace: {ex.StackTrace}",
-                    traceId
-                );
-            }
-        }
     }
 }

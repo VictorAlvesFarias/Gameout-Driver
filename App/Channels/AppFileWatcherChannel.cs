@@ -52,7 +52,7 @@ namespace App.Channels
         {
             try
             {
-                await _appFileService.IsProcessing(context);
+                await _appFileService.CheckStatus(context);
             }
             catch (Exception ex)
             {

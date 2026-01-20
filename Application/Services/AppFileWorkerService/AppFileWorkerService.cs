@@ -49,10 +49,10 @@ namespace Application.Services.AppFileWatcherService
 
         public async Task ProcessSingleSync(AppFileProcessingQueueItem queueItem)
         {
+            _applicationContext.CurrentAppFileProcessingQueueItem = queueItem;
+
             var jsonResponse = "";
             var traceId = queueItem.TraceId;
-
-            await _utilsService.SendAppStoredFileStatus(queueItem.AppStoredFileId, AppStoredFileStatusTypes.Processing, traceId);
 
             try
             {
@@ -62,10 +62,10 @@ namespace Application.Services.AppFileWatcherService
                         "Path not found during processing",
                         ApplicationLogType.Message,
                         ApplicationLogAction.Error,
-                        $"AppStoredFileId: {queueItem.AppStoredFileId}, AppFileId: {queueItem.AppFileId}, Path: {queueItem.Path}",
+                        $"AppFileId: {queueItem.AppFileId}, Path: {queueItem.Path}",
                         traceId
                     );
-                    await _utilsService.SendAppStoredFileStatus(queueItem.AppStoredFileId, AppStoredFileStatusTypes.PathNotFounded, traceId);
+                    await _utilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.PathNotFounded, traceId);
 
                     return;
                 }
@@ -76,10 +76,10 @@ namespace Application.Services.AppFileWatcherService
                         "Locked files detected during processing",
                         ApplicationLogType.Message,
                         ApplicationLogAction.Error,
-                        $"AppStoredFileId: {queueItem.AppStoredFileId}, AppFileId: {queueItem.AppFileId}, Path: {queueItem.Path}",
+                        $"AppFileId: {queueItem.AppFileId}, Path: {queueItem.Path}",
                         traceId
                     );
-                    await _utilsService.SendAppStoredFileStatus(queueItem.AppStoredFileId, AppStoredFileStatusTypes.LockedFiles, traceId);
+                    await _utilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.LockedFiles, traceId);
 
                     return;
                 }
@@ -94,16 +94,15 @@ namespace Application.Services.AppFileWatcherService
                         "No files found in directory during processing",
                         ApplicationLogType.Message,
                         ApplicationLogAction.Warning,
-                        $"AppStoredFileId: {queueItem.AppStoredFileId}, AppFileId: {queueItem.AppFileId}, Path: {queueItem.Path}",
+                        $"AppFileId: {queueItem.AppFileId}, Path: {queueItem.Path}",
                         traceId
                     );
 
-                    await _utilsService.SendAppStoredFileStatus(queueItem.AppStoredFileId, AppStoredFileStatusTypes.Error, traceId);
+                    await _utilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.Unsynced, traceId);
                     
                     return;
                 }
                 
-                // Criar e finalizar o arquivo ZIP antes de enviar
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, leaveOpen: true))
                 {
                     foreach (var file in files)
@@ -112,8 +111,7 @@ namespace Application.Services.AppFileWatcherService
                         archive.CreateEntryFromFile(file, entryName, CompressionLevel.Optimal);
                     }
                 }
-                // Archive é fechado aqui, finalizando o ZIP corretamente
-
+                
                 memoryStream.Seek(0, SeekOrigin.Begin);
                 
                 var zipBytes = memoryStream.ToArray();
@@ -122,7 +120,7 @@ namespace Application.Services.AppFileWatcherService
                     "ZIP file created successfully",
                     ApplicationLogType.Message,
                     ApplicationLogAction.Info,
-                    $"Size: {zipBytes.Length} bytes, Files: {files.Length}, AppStoredFileId: {queueItem.AppStoredFileId}, AppFileId: {queueItem.AppFileId}",
+                    $"Size: {zipBytes.Length} bytes, Files: {files.Length}, AppFileId: {queueItem.AppFileId}",
                     traceId
                 );
 
@@ -132,10 +130,10 @@ namespace Application.Services.AppFileWatcherService
                         "Generated ZIP file is empty",
                         ApplicationLogType.Message,
                         ApplicationLogAction.Error,
-                        $"AppStoredFileId: {queueItem.AppStoredFileId}, AppFileId: {queueItem.AppFileId}, Path: {queueItem.Path}",
+                        $"AppFileId: {queueItem.AppFileId}, Path: {queueItem.Path}",
                         traceId
                     );
-                    await _utilsService.SendAppStoredFileStatus(queueItem.AppStoredFileId, AppStoredFileStatusTypes.Error, traceId);
+                    await _utilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.Unsynced, traceId);
                     return;
                 }
 
@@ -143,7 +141,7 @@ namespace Application.Services.AppFileWatcherService
 
                 using var content = new MultipartFormDataContent();
 
-                content.Add(new StringContent(queueItem.AppStoredFileId.ToString()), "appStoredFileId");
+                content.Add(new StringContent(queueItem.AppFileId.ToString()), "appFileId");
                 content.Add(new StringContent(uncompressedSize.ToString()), "originalFileSize");
 
                 var fileContent = new ByteArrayContent(zipBytes);
@@ -167,10 +165,10 @@ namespace Application.Services.AppFileWatcherService
                             "Failed to upload file to backend",
                             ApplicationLogType.Message,
                             ApplicationLogAction.Error,
-                            $"AppStoredFileId: {queueItem.AppStoredFileId}, AppFileId: {queueItem.AppFileId}, Path: {queueItem.Path}, HTTP Status Code: {(int)response.StatusCode}, Response: {jsonResponse}",
+                            $"AppFileId: {queueItem.AppFileId}, Path: {queueItem.Path}, HTTP Status Code: {(int)response.StatusCode}, Response: {jsonResponse}",
                             traceId
                         );
-                        await _utilsService.SendAppStoredFileStatus(queueItem.AppStoredFileId, AppStoredFileStatusTypes.Error, traceId);
+                        await _utilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.Unsynced, traceId);
                         return;
                     }
                 }
@@ -181,10 +179,14 @@ namespace Application.Services.AppFileWatcherService
                     "Exception during synchronization processing",
                     ApplicationLogType.Exception,
                     ApplicationLogAction.Error,
-                    $"AppStoredFileId: {queueItem.AppStoredFileId}, AppFileId: {queueItem.AppFileId}, Path: {queueItem.Path}, Exception Type: {ex.GetType().Name}, Message: {ex.Message}, Response: {jsonResponse}, StackTrace: {ex.StackTrace}",
+                    $"AppFileId: {queueItem.AppFileId}, Path: {queueItem.Path}, Exception Type: {ex.GetType().Name}, Message: {ex.Message}, Response: {jsonResponse}, StackTrace: {ex.StackTrace}",
                     traceId
                 );
-                await _utilsService.SendAppStoredFileStatus(queueItem.AppStoredFileId, AppStoredFileStatusTypes.Error, traceId);
+                await _utilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.Unsynced, traceId);
+            }
+            finally
+            {
+                _applicationContext.CurrentAppFileProcessingQueueItem = null;
             }
         }
 

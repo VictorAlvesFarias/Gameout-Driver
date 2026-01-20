@@ -17,6 +17,9 @@ namespace Application.Types
         Unsynced = 4,
 
         [Description("Path not founded")]
-        PathNotFounded = 5
+        PathNotFounded = 5,
+
+        [Description("The folder is loked")]
+        LockedFiles = 6
     }
 }
