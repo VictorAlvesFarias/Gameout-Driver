@@ -263,9 +263,14 @@ namespace App.Services
                 )
             );
 
+            if (_configuration is IConfigurationRoot configRoot)
+            {
+                configRoot.Reload();
+            }
+
             MessageBox.Show(
-                "Reinicie a aplicação para aplicar as alterações.",
-                "Configuração Atualizada",
+                "Configuração atualizada com sucesso.",
+                "Gameout Driver",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information
             );
