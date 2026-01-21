@@ -22,14 +22,14 @@ namespace Application.Services.AppFileWatcherService
 {
     public class AppFileService : IAppFileService
     {
-        private readonly ApplicationContext _applicationContext;
+        private readonly Infrastructure.Context.ApplicationContext _applicationContext;
         private readonly IQueueService<AppFileProcessingQueueItem> _updateQueue;
         private readonly IUtilsService _loggingService;
         private readonly IConfiguration _configuration;
         private readonly IAppFileUtilsService _utilsService;
 
         public AppFileService(
-            ApplicationContext applicationContext,
+            Infrastructure.Context.ApplicationContext applicationContext,
             IConfiguration configuration,
             IQueueService<AppFileProcessingQueueItem> updateQueue,
             IUtilsService loggingService,

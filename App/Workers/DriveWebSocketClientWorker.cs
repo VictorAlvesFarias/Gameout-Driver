@@ -32,7 +32,7 @@ namespace App.Workers
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
-            MessageBox.Show($"The process of connecting to the server has been completed.");
+            MessageBox.Show($"The process of connecting to the server has been completed.", "Gameout Driver");
         }
 
         protected override async Task<string> GetUrlAsync()
@@ -79,7 +79,7 @@ namespace App.Workers
         {
             if (!this.ReconectRequest)
             {
-                MessageBox.Show($"Connection lost with the server.");
+                MessageBox.Show($"Connection lost with the server.", "Gameout Driver");
             }
 
 

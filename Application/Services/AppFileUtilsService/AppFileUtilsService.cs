@@ -21,7 +21,6 @@ namespace Application.Services.AppFileWatcherService
 {
     public class AppFileUtilsService : IAppFileUtilsService
     {
-        private readonly ApplicationContext _applicationContext;
         private readonly string _apiBaseUrl;
         private readonly string _apiKey;
         private readonly IQueueService<AppFileProcessingQueueItem> _updateQueue;
@@ -29,14 +28,12 @@ namespace Application.Services.AppFileWatcherService
         private readonly IWebSocketRequestContextAccessor _contextAccessor;
 
         public AppFileUtilsService(
-            ApplicationContext applicationContext,
             IConfiguration configuration,
             IQueueService<AppFileProcessingQueueItem> updateQueue,
             IUtilsService loggingService,
             IWebSocketRequestContextAccessor contextAccessor
         )
         {
-            _applicationContext = applicationContext;
             _apiKey = configuration["ApiKey"] ?? string.Empty;
             _apiBaseUrl = configuration["BackendApi:BaseUrl"] ?? "https://localhost:7000";
             _updateQueue = updateQueue;

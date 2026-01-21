@@ -193,11 +193,12 @@ namespace App.Services
         private void ShowConfigureUrlDialog()
         {
             var backendConfiguration = _configuration.GetSection("BackendApi").Get<BackendApiConfiguration>();
+            var webSocketConfiguration = _configuration.GetSection("WebSocket").Get<WebSocketConfiguration>();
             var form = new Form
             {
                 Text = "Configure Service URL",
                 Width = 500,
-                Height = 150,
+                Height = 180,
                 StartPosition = FormStartPosition.CenterScreen,
                 FormBorderStyle = FormBorderStyle.FixedDialog,
                 MaximizeBox = false,
@@ -205,13 +206,17 @@ namespace App.Services
             };
             var label = new Label { Text = "Backend URL:", Left = 20, Top = 20, Width = 120 };
             var textBox = new TextBox { Text = backendConfiguration.BaseUrl, Left = 140, Top = 20, Width = 320 };
-            var save = new Button { Text = "Save", Left = 280, Top = 60, Width = 80, DialogResult = DialogResult.OK };
-            var cancel = new Button { Text = "Cancel", Left = 370, Top = 60, Width = 80, DialogResult = DialogResult.Cancel };
+            var label2 = new Label { Text = "WebSocket URL:", Left = 20, Top = 50, Width = 120 };
+            var textBox2 = new TextBox { Text = webSocketConfiguration.Url, Left = 140, Top = 50, Width = 320 };
+            var save = new Button { Text = "Save", Left = 280, Top = 90, Width = 80, DialogResult = DialogResult.OK };
+            var cancel = new Button { Text = "Cancel", Left = 370, Top = 90, Width = 80, DialogResult = DialogResult.Cancel };
 
             form.Controls.AddRange(new Control[]
             {
                 label,
                 textBox,
+                label2,
+                textBox2,
                 save,
                 cancel
             });
@@ -224,7 +229,9 @@ namespace App.Services
             }
 
             var newUrl = textBox.Text.Trim();
-            if (string.IsNullOrWhiteSpace(newUrl))
+            var newUrl2 = textBox2.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(newUrl2) || string.IsNullOrWhiteSpace(newUrl))
             {
                 return;
             }
@@ -241,6 +248,11 @@ namespace App.Services
             settings["BackendApi"] = new Dictionary<string, object>
             {
                 { "BaseUrl", newUrl }
+            };
+
+            settings["WebSocket"] = new Dictionary<string, object>
+            {
+                { "Url", newUrl2 }
             };
 
             File.WriteAllText(

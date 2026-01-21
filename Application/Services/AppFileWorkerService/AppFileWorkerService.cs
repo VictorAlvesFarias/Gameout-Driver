@@ -21,7 +21,7 @@ namespace Application.Services.AppFileWatcherService
 {
     public class AppFileWorkerService : IAppFileWorkerService
     {
-        private readonly ApplicationContext _applicationContext;
+        private readonly Infrastructure.Context.ApplicationContext _applicationContext;
         private readonly string _apiBaseUrl;
         private readonly string _apiKey;
         private readonly IQueueService<AppFileProcessingQueueItem> _updateQueue;
@@ -30,7 +30,7 @@ namespace Application.Services.AppFileWatcherService
         private readonly IAppFileUtilsService _utilsService;
 
         public AppFileWorkerService(
-            ApplicationContext applicationContext,
+            Infrastructure.Context.ApplicationContext applicationContext,
             IConfiguration configuration,
             IQueueService<AppFileProcessingQueueItem> updateQueue,
             IUtilsService loggingService,

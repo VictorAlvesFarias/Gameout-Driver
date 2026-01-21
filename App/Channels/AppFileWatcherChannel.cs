@@ -28,7 +28,7 @@ namespace App.Channels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error: {ex.Message}");
+                MessageBox.Show($"Error: {ex.Message}", "Gameout Driver");
             }
         }
 
@@ -42,7 +42,7 @@ namespace App.Channels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error: {ex.Message}");
+                MessageBox.Show($"Error: {ex.Message}", "Gameout Driver");
             }
         }
 
@@ -56,7 +56,7 @@ namespace App.Channels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error: {ex.Message}");
+                MessageBox.Show($"Error: {ex.Message}", "Gameout Driver");
             }
         }
 
@@ -70,7 +70,7 @@ namespace App.Channels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error: {ex.Message}");
+                MessageBox.Show($"Error: {ex.Message}", "Gameout Driver");
             }
         }
     }
