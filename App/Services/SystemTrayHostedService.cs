@@ -198,7 +198,7 @@ namespace App.Services
             {
                 Text = "Configure Service URL",
                 Width = 500,
-                Height = 180,
+                Height = 220,
                 StartPosition = FormStartPosition.CenterScreen,
                 FormBorderStyle = FormBorderStyle.FixedDialog,
                 MaximizeBox = false,
@@ -206,10 +206,15 @@ namespace App.Services
             };
             var label = new Label { Text = "Backend URL:", Left = 20, Top = 20, Width = 120 };
             var textBox = new TextBox { Text = backendConfiguration.BaseUrl, Left = 140, Top = 20, Width = 320 };
+            
             var label2 = new Label { Text = "WebSocket URL:", Left = 20, Top = 50, Width = 120 };
             var textBox2 = new TextBox { Text = webSocketConfiguration.Url, Left = 140, Top = 50, Width = 320 };
-            var save = new Button { Text = "Save", Left = 280, Top = 90, Width = 80, DialogResult = DialogResult.OK };
-            var cancel = new Button { Text = "Cancel", Left = 370, Top = 90, Width = 80, DialogResult = DialogResult.Cancel };
+
+            var label3 = new Label { Text = "API Key:", Left = 20, Top = 80, Width = 120 };
+            var textBox3 = new TextBox { Text = backendConfiguration.ApiKey, Left = 140, Top = 80, Width = 320 };
+
+            var save = new Button { Text = "Save", Left = 280, Top = 120, Width = 80, DialogResult = DialogResult.OK };
+            var cancel = new Button { Text = "Cancel", Left = 370, Top = 120, Width = 80, DialogResult = DialogResult.Cancel };
 
             form.Controls.AddRange(new Control[]
             {
@@ -217,6 +222,8 @@ namespace App.Services
                 textBox,
                 label2,
                 textBox2,
+                label3,
+                textBox3,
                 save,
                 cancel
             });
@@ -230,8 +237,9 @@ namespace App.Services
 
             var newUrl = textBox.Text.Trim();
             var newUrl2 = textBox2.Text.Trim();
+            var newApiKey = textBox3.Text.Trim();
 
-            if (string.IsNullOrWhiteSpace(newUrl2) || string.IsNullOrWhiteSpace(newUrl))
+            if (string.IsNullOrWhiteSpace(newUrl2) || string.IsNullOrWhiteSpace(newUrl) || string.IsNullOrWhiteSpace(newApiKey))
             {
                 return;
             }
@@ -247,7 +255,8 @@ namespace App.Services
 
             settings["BackendApi"] = new Dictionary<string, object>
             {
-                { "BaseUrl", newUrl }
+                { "BaseUrl", newUrl },
+                { "ApiKey", newApiKey }
             };
 
             settings["WebSocket"] = new Dictionary<string, object>

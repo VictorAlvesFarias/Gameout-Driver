@@ -10,6 +10,7 @@ using Web.Api.Toolkit.Queues.Application.Services;
 using Web.Api.Toolkit.Ws.Application.Contexts;
 using Web.Api.Toolkit.Ws.Application.Extensions;
 using App.Services;
+using Application.Configuration;
 
 var host = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -33,6 +34,10 @@ var host = Host.CreateDefaultBuilder(args)
         // Registrar filas - IQueueService é registrado automaticamente pelo pacote
         // mas precisamos garantir que está disponível
         services.AddSingleton(typeof(IQueueService<>), typeof(QueueService<>));
+
+        // Configurar Options para hot-reload
+        services.Configure<WebSocketConfiguration>(context.Configuration.GetSection("WebSocket"));
+        services.Configure<BackendApiConfiguration>(context.Configuration.GetSection("BackendApi"));
 
         services.AddSingleton<DriveWebSocketClientWorker>();
         services.AddHostedService(e =>
