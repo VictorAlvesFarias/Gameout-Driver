@@ -1,4 +1,5 @@
 using App.Workers;
+using Application.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -191,8 +192,7 @@ namespace App.Services
 
         private void ShowConfigureUrlDialog()
         {
-            var currentUrl = _configuration["BackendApi:BaseUrl"] ?? "https://localhost:7000";
-
+            var backendConfiguration = _configuration.GetSection("BackendApi").Get<BackendApiConfiguration>();
             var form = new Form
             {
                 Text = "Configure Service URL",
@@ -203,9 +203,8 @@ namespace App.Services
                 MaximizeBox = false,
                 MinimizeBox = false
             };
-
             var label = new Label { Text = "Backend URL:", Left = 20, Top = 20, Width = 120 };
-            var textBox = new TextBox { Text = currentUrl, Left = 140, Top = 20, Width = 320 };
+            var textBox = new TextBox { Text = backendConfiguration.BaseUrl, Left = 140, Top = 20, Width = 320 };
             var save = new Button { Text = "Save", Left = 280, Top = 60, Width = 80, DialogResult = DialogResult.OK };
             var cancel = new Button { Text = "Cancel", Left = 370, Top = 60, Width = 80, DialogResult = DialogResult.Cancel };
 
