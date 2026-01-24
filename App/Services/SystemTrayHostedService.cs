@@ -1,5 +1,6 @@
 using App.Workers;
 using Application.Configuration;
+using Application.Constants;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -116,7 +117,7 @@ namespace App.Services
             {
                 MessageBox.Show(
                     "Gameout Driver\nVersão 1.0.0",
-                    "Gameout Driver",
+                    ApplicationConstants.ApplicationName,
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information
                 );
@@ -279,7 +280,7 @@ namespace App.Services
 
             MessageBox.Show(
                 "Configuração atualizada com sucesso.",
-                "Gameout Driver",
+                ApplicationConstants.ApplicationName,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information
             );
@@ -294,7 +295,7 @@ namespace App.Services
             _notifyIcon = new NotifyIcon
             {
                 Icon = File.Exists(iconPath) ? new Icon(iconPath) : SystemIcons.Application,
-                Text = "Gameout Driver",
+                Text = ApplicationConstants.ApplicationName,
                 Visible = true,
                 ContextMenuStrip = CreateMenu()
             };
@@ -303,7 +304,7 @@ namespace App.Services
             {
                 MessageBox.Show(
                     "Gameout Driver está em execução.",
-                    "Gameout Driver",
+                    ApplicationConstants.ApplicationName,
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information
                 );

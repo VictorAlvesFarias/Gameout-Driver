@@ -1,3 +1,4 @@
+using Application.Constants;
 using Application.Services.AppFileWatcherService;
 using Domain.Queues.AppFileDtos;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,7 +49,7 @@ namespace App.Workers
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error: {ex.Message}", "Gameout Driver");
+                    MessageBox.Show($"Error: {ex.Message}", ApplicationConstants.ApplicationName);
                 }
             }
         }

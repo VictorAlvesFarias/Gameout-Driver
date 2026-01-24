@@ -1,21 +1,11 @@
-﻿using Application.Dtos;
-using Application.Dtos.AppFile;
-using Application.Services.LoggingService;
+﻿using Application.Services.LoggingService;
 using Application.Types;
-using Domain.Entitites.ApplicationContext;
-using Domain.Entitites.ApplicationContextDb;
-using Domain.Entitites.Shared;
 using Domain.Queues.AppFileDtos;
-using Infrastructure.Context;
 using Microsoft.Extensions.Configuration;
-using System.IO;
 using System.IO.Compression;
-using System.Text;
-using System.Text.Json;
-using Web.Api.Toolkit.Helpers.Application.Dtos;
+using Web.Api.Toolkit.Helpers.Application.Extensions;
 using Web.Api.Toolkit.Queues.Application.Services;
 using Web.Api.Toolkit.Ws.Application.Contexts;
-using Web.Api.Toolkit.Ws.Application.Dtos;
 
 namespace Application.Services.AppFileWatcherService
 {
@@ -25,9 +15,9 @@ namespace Application.Services.AppFileWatcherService
         private readonly string _apiBaseUrl;
         private readonly string _apiKey;
         private readonly IQueueService<AppFileProcessingQueueItem> _updateQueue;
-        private readonly IUtilsService _loggingService;
+        private readonly IUtilsService _utilsService;
         private readonly IWebSocketRequestContextAccessor _contextAccessor;
-        private readonly IAppFileUtilsService _utilsService;
+        private readonly IAppFileUtilsService _appFileUtilsService;
 
         public AppFileWorkerService(
             Infrastructure.Context.ApplicationContext applicationContext,
@@ -42,9 +32,9 @@ namespace Application.Services.AppFileWatcherService
             _apiKey = configuration["ApiKey"] ?? string.Empty;
             _apiBaseUrl = configuration["BackendApi:BaseUrl"] ?? "https://localhost:7000";
             _updateQueue = updateQueue;
-            _loggingService = loggingService;
+            _utilsService = loggingService;
             _contextAccessor = contextAccessor;
-            _utilsService = utilsService;
+            _appFileUtilsService = utilsService;
         }
 
         public async Task ProcessSingleSync(AppFileProcessingQueueItem queueItem)
@@ -58,39 +48,41 @@ namespace Application.Services.AppFileWatcherService
             {
                 if (!Directory.Exists(queueItem.Path))
                 {
-                    await _loggingService.LogAsync(
+                    await _utilsService.LogAsync(
                         "Path not found during processing",
                         ApplicationLogType.Message,
                         ApplicationLogAction.Error,
                         $"AppFileId: {queueItem.AppFileId}, Path: {queueItem.Path}",
                         traceId
                     );
-                    await _utilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.PathNotFounded, traceId);
+
+                    await _appFileUtilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.PathNotFounded, traceId);
 
                     return;
                 }
 
                 if (!DirectoryAccessible(queueItem.Path))
                 {
-                    await _loggingService.LogAsync(
+                    await _utilsService.LogAsync(
                         "Locked files detected during processing",
                         ApplicationLogType.Message,
                         ApplicationLogAction.Error,
                         $"AppFileId: {queueItem.AppFileId}, Path: {queueItem.Path}",
                         traceId
                     );
-                    await _utilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.LockedFiles, traceId);
+
+                    await _appFileUtilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.LockedFiles, traceId);
 
                     return;
                 }
 
-                using var memoryStream = new MemoryStream();
-                
-                var files = Directory.GetFiles(queueItem.Path, "*", SearchOption.AllDirectories);
-                
+                var tempZipPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.zip");
+                var directory = new DirectoryInfo(queueItem.Path);
+                var files = directory.GetFiles("*", SearchOption.AllDirectories);
+
                 if (files.Length == 0)
                 {
-                    await _loggingService.LogAsync(
+                    await _utilsService.LogAsync(
                         "No files found in directory during processing",
                         ApplicationLogType.Message,
                         ApplicationLogAction.Warning,
@@ -98,91 +90,166 @@ namespace Application.Services.AppFileWatcherService
                         traceId
                     );
 
-                    await _utilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.Unsynced, traceId);
+                    await _appFileUtilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.Synced, traceId);
                     
                     return;
                 }
                 
-                using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, leaveOpen: true))
+                using (var fileStream = new FileStream(tempZipPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 81920, useAsync: true))
                 {
-                    foreach (var file in files)
+                    using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Create, leaveOpen: false))
                     {
-                        var entryName = Path.GetRelativePath(queueItem.Path, file);
-                        archive.CreateEntryFromFile(file, entryName, CompressionLevel.Optimal);
+                        foreach (var file in files)
+                        {
+                            var entryName = Path.GetRelativePath(directory.FullName, file.FullName);
+                            archive.CreateEntryFromFile(file.FullName, entryName, CompressionLevel.Optimal);
+                        }
                     }
                 }
-                
-                memoryStream.Seek(0, SeekOrigin.Begin);
-                
-                var zipBytes = memoryStream.ToArray();
 
-                await _loggingService.LogAsync(
+                var zipFileInfo = new FileInfo(tempZipPath);
+                var zipFileSize = zipFileInfo.Length;
+
+                await _utilsService.LogAsync(
                     "ZIP file created successfully",
                     ApplicationLogType.Message,
                     ApplicationLogAction.Info,
-                    $"Size: {zipBytes.Length} bytes, Files: {files.Length}, AppFileId: {queueItem.AppFileId}",
+                    $"Size: {zipFileSize} bytes, Files: {files.Length}, AppFileId: {queueItem.AppFileId}",
                     traceId
                 );
 
-                if (zipBytes.Length == 0)
+                var uncompressedSize = directory.GetDirectorySize();
+                var chunkSize = 50 * 1024 * 1024;
+                var totalChunks = (int)Math.Ceiling((double)zipFileSize / chunkSize);
+                var uploadId = Guid.NewGuid().ToString();
+
+                await _utilsService.LogAsync(
+                    $"Starting chunked upload with {totalChunks} chunks",
+                    ApplicationLogType.Message,
+                    ApplicationLogAction.Info,
+                    $"AppFileId: {queueItem.AppFileId}, UploadId: {uploadId}, Total Size: {zipFileSize} bytes",
+                    traceId
+                );
+
+                try
                 {
-                    await _loggingService.LogAsync(
-                        "Generated ZIP file is empty",
-                        ApplicationLogType.Message,
-                        ApplicationLogAction.Error,
-                        $"AppFileId: {queueItem.AppFileId}, Path: {queueItem.Path}",
-                        traceId
-                    );
-                    await _utilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.Unsynced, traceId);
-                    return;
-                }
-
-                var uncompressedSize = GetDirectorySize(files);
-
-                using var content = new MultipartFormDataContent();
-
-                content.Add(new StringContent(queueItem.AppFileId.ToString()), "appFileId");
-                content.Add(new StringContent(uncompressedSize.ToString()), "originalFileSize");
-
-                var fileContent = new ByteArrayContent(zipBytes);
-                fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/zip");
-
-                content.Add(fileContent, "file", "archive.zip");
-
-                using (var httpClient = _loggingService.CreateHttpClient(traceId))
-                {
-
-                    var response = await httpClient.PostAsync(
-                        $"{_apiBaseUrl}/stream-file",
-                        content
-                    );
-
-                    jsonResponse = await response.Content.ReadAsStringAsync();
-
-                    if (!response.IsSuccessStatusCode)
+                    using (var httpClient = _utilsService.CreateHttpClient(traceId))
                     {
-                        await _loggingService.LogAsync(
-                            "Failed to upload file to backend",
+                        using (var fileStream = new FileStream(tempZipPath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 81920, useAsync: true))
+                        {
+                            for (int i = 0; i < totalChunks; i++)
+                            {
+                                var offset = i * chunkSize;
+                                var currentChunkSize = (int)Math.Min(chunkSize, zipFileSize - offset);
+                                var chunkData = new byte[currentChunkSize];
+                                
+                                fileStream.Seek(offset, SeekOrigin.Begin);
+
+                                await fileStream.ReadAsync(chunkData, 0, currentChunkSize);
+
+                                using var content = new MultipartFormDataContent();
+
+                                content.Add(new StringContent(queueItem.AppFileId.ToString()), "AppFileId");
+                                content.Add(new StringContent(i.ToString()), "ChunkIndex");
+                                content.Add(new StringContent(totalChunks.ToString()), "TotalChunks");
+                                content.Add(new StringContent(uploadId), "UploadId");
+                                content.Add(new StringContent(uncompressedSize.ToString()), "OriginalFileSize");
+                                content.Add(new StringContent(traceId.ToString()), "TraceId");
+
+                                var fileContent = new ByteArrayContent(chunkData);
+
+                                fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+                                
+                                content.Add(fileContent, "ChunkData", $"chunk_{i}.dat");
+
+                                await _utilsService.LogAsync(
+                                    $"Uploading chunk {i + 1}/{totalChunks}",
+                                    ApplicationLogType.Message,
+                                    ApplicationLogAction.Info,
+                                    $"Size: {currentChunkSize} bytes, AppFileId: {queueItem.AppFileId}",
+                                    traceId
+                                );
+
+                                var response = await httpClient.PostAsync(
+                                    $"{_apiBaseUrl}/upload-chunk",
+                                    content
+                                );
+
+                                jsonResponse = await response.Content.ReadAsStringAsync();
+
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            await _utilsService.LogAsync(
+                                $"Failed to upload chunk {i + 1}/{totalChunks}",
+                                ApplicationLogType.Message,
+                                ApplicationLogAction.Error,
+                                $"AppFileId: {queueItem.AppFileId}, HTTP Status Code: {(int)response.StatusCode}, Response: {jsonResponse}",
+                                traceId
+                            );
+                            
+                            await _appFileUtilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.Unsynced, traceId);
+                            
+                            return;
+                        }
+
+                        await _utilsService.LogAsync(
+                            $"Chunk {i + 1}/{totalChunks} uploaded successfully",
                             ApplicationLogType.Message,
-                            ApplicationLogAction.Error,
-                            $"AppFileId: {queueItem.AppFileId}, Path: {queueItem.Path}, HTTP Status Code: {(int)response.StatusCode}, Response: {jsonResponse}",
+                            ApplicationLogAction.Success,
+                            $"AppFileId: {queueItem.AppFileId}",
                             traceId
                         );
-                        await _utilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.Unsynced, traceId);
-                        return;
+                    }
+                        }
+                    }
+
+                    await _utilsService.LogAsync(
+                        "All chunks uploaded successfully",
+                        ApplicationLogType.Message,
+                        ApplicationLogAction.Success,
+                        $"AppFileId: {queueItem.AppFileId}, Total Chunks: {totalChunks}",
+                        traceId
+                    );
+                }
+                finally
+                {
+                    if (File.Exists(tempZipPath))
+                    {
+                        try
+                        {
+                            File.Delete(tempZipPath);
+                 
+                            await _utilsService.LogAsync(
+                                "Temporary ZIP file deleted",
+                                ApplicationLogType.Message,
+                                ApplicationLogAction.Info,
+                                $"Path: {tempZipPath}",
+                                traceId
+                            );
+                        }
+                        catch (Exception deleteEx)
+                        {
+                            await _utilsService.LogAsync(
+                                "Failed to delete temporary ZIP file",
+                                ApplicationLogType.Exception,
+                                ApplicationLogAction.Warning,
+                                $"Path: {tempZipPath}, Exception: {deleteEx.Message}",
+                                traceId
+                            );
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
-                await _loggingService.LogAsync(
+                await _utilsService.LogAsync(
                     "Exception during synchronization processing",
                     ApplicationLogType.Exception,
                     ApplicationLogAction.Error,
                     $"AppFileId: {queueItem.AppFileId}, Path: {queueItem.Path}, Exception Type: {ex.GetType().Name}, Message: {ex.Message}, Response: {jsonResponse}, StackTrace: {ex.StackTrace}",
                     traceId
                 );
-                await _utilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.Unsynced, traceId);
+                await _appFileUtilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.Unsynced, traceId);
             }
             finally
             {

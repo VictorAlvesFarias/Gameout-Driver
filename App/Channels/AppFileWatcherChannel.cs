@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Web.Api.Toolkit.Ws.Application.Attributes;
 using Web.Api.Toolkit.Ws.Application.Channels;
 using Web.Api.Toolkit.Ws.Application.Contexts;
+using Application.Constants;
 
 namespace App.Channels
 {
@@ -28,7 +29,7 @@ namespace App.Channels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error: {ex.Message}", "Gameout Driver");
+                MessageBox.Show($"Error: {ex.Message}", ApplicationConstants.ApplicationName);
             }
         }
 
@@ -42,7 +43,7 @@ namespace App.Channels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error: {ex.Message}", "Gameout Driver");
+                MessageBox.Show($"Error: {ex.Message}", ApplicationConstants.ApplicationName);
             }
         }
 
@@ -56,7 +57,7 @@ namespace App.Channels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error: {ex.Message}", "Gameout Driver");
+                MessageBox.Show($"Error: {ex.Message}", ApplicationConstants.ApplicationName);
             }
         }
 
@@ -70,7 +71,7 @@ namespace App.Channels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error: {ex.Message}", "Gameout Driver");
+                MessageBox.Show($"Error: {ex.Message}", ApplicationConstants.ApplicationName);
             }
         }
     }
