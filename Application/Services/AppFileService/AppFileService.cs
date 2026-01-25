@@ -14,6 +14,7 @@ using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
 using Web.Api.Toolkit.Helpers.Application.Dtos;
+using Web.Api.Toolkit.Helpers.Application.Extensions;
 using Web.Api.Toolkit.Queues.Application.Services;
 using Web.Api.Toolkit.Ws.Application.Contexts;
 using Web.Api.Toolkit.Ws.Application.Dtos;
@@ -274,56 +275,6 @@ namespace Application.Services.AppFileWatcherService
             }
         }
 
-        public async Task CheckStatus(AppFileStatusCheckRequestMessage body)
-        {
-            var traceId = _loggingService.GetTraceId();
-            var itemInQueue = _updateQueue.Contains(e => e.AppFileId == body.AppFileId);
-
-            if (itemInQueue)
-            {
-                if (_applicationContext.CurrentAppFileProcessingQueueItem?.AppFileId == body.AppFileId)
-                {
-                    await this._utilsService.SendAppFileStatus(body.AppFileId, AppFileStatusTypes.Processing, traceId);
-
-                    return;
-                }
-                else
-                {
-                    await this._utilsService.SendAppFileStatus(body.AppFileId, AppFileStatusTypes.Pending, traceId);
-
-                    return;
-                }
-            }
-            else if (!Directory.Exists(body.Path))
-            {
-                await _loggingService.LogAsync(
-                    "Path not found during status check",
-                    ApplicationLogType.Message,
-                    ApplicationLogAction.Error,
-                    $"AppFileId: {body.AppFileId}, Path: {body.Path}",
-                    traceId
-                );
-
-                await this._utilsService.SendAppFileStatus(body.AppFileId, AppFileStatusTypes.PathNotFounded, traceId);
-
-                return;
-            }
-            else if (!DirectoryAccessible(body.Path))
-            {
-                await _loggingService.LogAsync(
-                    "Locked files detected during status check",
-                    ApplicationLogType.Message,
-                    ApplicationLogAction.Error,
-                    $"AppFileId: {body.AppFileId}, Path: {body.Path}",
-                    traceId
-                );
-
-                await this._utilsService.SendAppFileStatus(body.AppFileId, AppFileStatusTypes.LockedFiles, traceId);
-
-                return;
-            }
-        }
-
         public async Task CheckAppFileStatusAll(AppFileStatusCheckAllRequestMessage body)
         {
             var traceId = _loggingService.GetTraceId();
@@ -332,6 +283,7 @@ namespace Application.Services.AppFileWatcherService
             if (hasFilesInProcessing)
             {
                 await _utilsService.SendAppFileStatus(body.AppFileId, AppFileStatusTypes.Processing, traceId);
+               
                 return;
             }
 
@@ -342,13 +294,14 @@ namespace Application.Services.AppFileWatcherService
             {
                 if (Directory.Exists(body.Path))
                 {
-                    var files = Directory.GetFiles(body.Path, "*", SearchOption.AllDirectories);
+                    var dirInfo = new DirectoryInfo(body.Path);
+                    var files = dirInfo.GetFiles("*", SearchOption.AllDirectories);
 
-                    currentFolderSize = GetDirectorySize(files);
+                    currentFolderSize = dirInfo.GetDirectorySize();
                         
                     if (files.Length > 0)
                     {
-                        mostRecentDate = files.Select(f => File.GetLastWriteTime(f)).Max();
+                        mostRecentDate = files.Select(f => File.GetLastWriteTime(f.FullName)).Max();
                     }
                 }
                 else
@@ -394,32 +347,6 @@ namespace Application.Services.AppFileWatcherService
             }
 
             await _utilsService.SendAppFileStatus(body.AppFileId, AppFileStatusTypes.Synced, traceId);
-        }
-
-        public long GetDirectorySize(IEnumerable<string> files)
-        {
-            long size = 0;
-
-            foreach (var file in files)
-            {
-                try
-                {
-                    var info = new FileInfo(file);
-                    size += info.Length;
-                }
-                catch (Exception ex)
-                {
-                    _loggingService.LogAsync(
-                        "Error getting file size",
-                        ApplicationLogType.Exception,
-                        ApplicationLogAction.Error,
-                        $"File: {file}, Exception Type: {ex.GetType().Name}, Message: {ex.Message}, StackTrace: {ex.StackTrace}",
-                        ""
-                    ).Wait();
-                }
-            }
-
-            return size;
         }
 
         public void SingleSync(AppFileUpdateRequestMessage body)

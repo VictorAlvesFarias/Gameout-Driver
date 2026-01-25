@@ -59,6 +59,7 @@ namespace App.Workers
             }
 
             var uri = new Uri(webSocketConfiguration.Url);
+
             cookies.Add(uri, new Cookie("type", "drive"));
 
             return cookies;

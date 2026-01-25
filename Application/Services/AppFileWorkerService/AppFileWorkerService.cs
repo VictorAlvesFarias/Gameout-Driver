@@ -1,8 +1,11 @@
-﻿using Application.Services.LoggingService;
+﻿using Application.Dtos;
+using Application.Services.LoggingService;
 using Application.Types;
 using Domain.Queues.AppFileDtos;
 using Microsoft.Extensions.Configuration;
 using System.IO.Compression;
+using System.Text.Json;
+using Web.Api.Toolkit.Helpers.Application.Dtos;
 using Web.Api.Toolkit.Helpers.Application.Extensions;
 using Web.Api.Toolkit.Queues.Application.Services;
 using Web.Api.Toolkit.Ws.Application.Contexts;
@@ -121,15 +124,88 @@ namespace Application.Services.AppFileWatcherService
                 var uncompressedSize = directory.GetDirectorySize();
                 var chunkSize = 50 * 1024 * 1024;
                 var totalChunks = (int)Math.Ceiling((double)zipFileSize / chunkSize);
-                var uploadId = Guid.NewGuid().ToString();
 
-                await _utilsService.LogAsync(
-                    $"Starting chunked upload with {totalChunks} chunks",
-                    ApplicationLogType.Message,
-                    ApplicationLogAction.Info,
-                    $"AppFileId: {queueItem.AppFileId}, UploadId: {uploadId}, Total Size: {zipFileSize} bytes",
-                    traceId
-                );
+                // Primeiro, criar AppStoredFile no backend
+                int appStoredFileId = 0;
+                using (var httpClient = _utilsService.CreateHttpClient(traceId))
+                {
+                    var createRequest = new AppStoredFileCreateRequestDto
+                    {
+                        AppFileId = queueItem.AppFileId,
+                        OriginalFileSize = uncompressedSize
+                    };
+
+                    var createContent = new StringContent(
+                        JsonSerializer.Serialize(createRequest),
+                        System.Text.Encoding.UTF8,
+                        "application/json"
+                    );
+
+                    var createResponse = await httpClient.PostAsync(
+                        $"{_apiBaseUrl}/create-app-stored-file",
+                        createContent
+                    );
+
+                    var createJsonResponse = await createResponse.Content.ReadAsStringAsync();
+
+                    if (!createResponse.IsSuccessStatusCode)
+                    {
+                        await _utilsService.LogAsync(
+                            "Failed to create AppStoredFile",
+                            ApplicationLogType.Message,
+                            ApplicationLogAction.Error,
+                            $"AppFileId: {queueItem.AppFileId}, HTTP Status Code: {(int)createResponse.StatusCode}, Response: {createJsonResponse}",
+                            traceId
+                        );
+
+                        await _appFileUtilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.Unsynced, traceId);
+                        return;
+                    }
+
+                    var createResult = JsonSerializer.Deserialize<BaseResponse<AppStoredFileCreateResponseDto>>(
+                        createJsonResponse,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                    );
+
+                    if (createResult?.Data == null)
+                    {
+                        await _utilsService.LogAsync(
+                            "Failed to parse AppStoredFile creation response",
+                            ApplicationLogType.Message,
+                            ApplicationLogAction.Error,
+                            $"AppFileId: {queueItem.AppFileId}, Response: {createJsonResponse}",
+                            traceId
+                        );
+
+                        await _appFileUtilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.Unsynced, traceId);
+                        return;
+                    }
+
+                    appStoredFileId = createResult.Data.AppStoredFileId;
+
+                    await _utilsService.LogAsync(
+                        $"AppStoredFile created successfully - ID: {appStoredFileId}, DiskFileId: {createResult.Data.DiskFileId}",
+                        ApplicationLogType.Message,
+                        ApplicationLogAction.Success,
+                        $"AppFileId: {queueItem.AppFileId}, Starting chunked upload with {totalChunks} chunks, Total Size: {zipFileSize} bytes",
+                        traceId
+                    );
+
+                    // Validar que o ID foi criado corretamente
+                    if (appStoredFileId <= 0)
+                    {
+                        await _utilsService.LogAsync(
+                            "Invalid AppStoredFileId returned from server",
+                            ApplicationLogType.Message,
+                            ApplicationLogAction.Error,
+                            $"AppFileId: {queueItem.AppFileId}, AppStoredFileId: {appStoredFileId}",
+                            traceId
+                        );
+
+                        await _appFileUtilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.Unsynced, traceId);
+                        return;
+                    }
+                }
 
                 try
                 {
@@ -149,11 +225,9 @@ namespace Application.Services.AppFileWatcherService
 
                                 using var content = new MultipartFormDataContent();
 
-                                content.Add(new StringContent(queueItem.AppFileId.ToString()), "AppFileId");
+                                content.Add(new StringContent(appStoredFileId.ToString()), "AppStoredFileId");
                                 content.Add(new StringContent(i.ToString()), "ChunkIndex");
                                 content.Add(new StringContent(totalChunks.ToString()), "TotalChunks");
-                                content.Add(new StringContent(uploadId), "UploadId");
-                                content.Add(new StringContent(uncompressedSize.ToString()), "OriginalFileSize");
                                 content.Add(new StringContent(traceId.ToString()), "TraceId");
 
                                 var fileContent = new ByteArrayContent(chunkData);
@@ -166,7 +240,7 @@ namespace Application.Services.AppFileWatcherService
                                     $"Uploading chunk {i + 1}/{totalChunks}",
                                     ApplicationLogType.Message,
                                     ApplicationLogAction.Info,
-                                    $"Size: {currentChunkSize} bytes, AppFileId: {queueItem.AppFileId}",
+                                    $"AppStoredFileId: {appStoredFileId}, Size: {currentChunkSize} bytes, AppFileId: {queueItem.AppFileId}",
                                     traceId
                                 );
 
@@ -183,9 +257,39 @@ namespace Application.Services.AppFileWatcherService
                                 $"Failed to upload chunk {i + 1}/{totalChunks}",
                                 ApplicationLogType.Message,
                                 ApplicationLogAction.Error,
-                                $"AppFileId: {queueItem.AppFileId}, HTTP Status Code: {(int)response.StatusCode}, Response: {jsonResponse}",
+                                $"AppFileId: {queueItem.AppFileId}, AppStoredFileId: {appStoredFileId}, HTTP Status Code: {(int)response.StatusCode}, Response: {jsonResponse}",
                                 traceId
                             );
+                            
+                            try
+                            {
+                                var statusRequest = new AppStoredFileUpdateStatusRequestDto
+                                {
+                                    AppStoredFileId = appStoredFileId,
+                                    Status = AppStoredFileStatusTypes.Error
+                                };
+
+                                var statusContent = new StringContent(
+                                    JsonSerializer.Serialize(statusRequest),
+                                    System.Text.Encoding.UTF8,
+                                    "application/json"
+                                );
+                                
+                                await httpClient.PutAsync(
+                                    $"{_apiBaseUrl}/update-app-stored-file-status",
+                                    statusContent
+                                );
+                            }
+                            catch (Exception ex)
+                            {
+                                await _utilsService.LogAsync(
+                                    "Failed to update AppStoredFile status to Error",
+                                    ApplicationLogType.Exception,
+                                    ApplicationLogAction.Error,
+                                    $"AppStoredFileId: {appStoredFileId}, Exception: {ex.Message}",
+                                    traceId
+                                );
+                            }
                             
                             await _appFileUtilsService.SendAppFileStatus(queueItem.AppFileId, AppFileStatusTypes.Unsynced, traceId);
                             
@@ -274,19 +378,6 @@ namespace Application.Services.AppFileWatcherService
             {
                 return false;
             }
-        }
-
-        private long GetDirectorySize(string[] files)
-        {
-            long size = 0;
-
-            foreach (var file in files)
-            {
-                var fileInfo = new FileInfo(file);
-                size += fileInfo.Length;
-            }
-
-            return size;
         }
     }
 }

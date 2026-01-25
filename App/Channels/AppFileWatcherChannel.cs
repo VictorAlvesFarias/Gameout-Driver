@@ -48,20 +48,6 @@ namespace App.Channels
         }
 
         [WsTraced]
-        [WsAction("CheckStatus")]
-        public async Task CheckStatus(AppFileStatusCheckRequestMessage context)
-        {
-            try
-            {
-                await _appFileService.CheckStatus(context);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error: {ex.Message}", ApplicationConstants.ApplicationName);
-            }
-        }
-
-        [WsTraced]
         [WsAction("CheckAppFileStatusAll")]
         public async Task CheckAppFileStatusAll(AppFileStatusCheckAllRequestMessage context)
         {

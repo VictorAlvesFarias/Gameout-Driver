@@ -34,7 +34,7 @@ namespace Application.Services.LoggingService
             var webSocketConfiguration = _configuration.GetSection("WebSocket").Get<WebSocketConfiguration>();
             var httpClient = new HttpClient();
 
-            if (!string.IsNullOrWhiteSpace(backendConfiguration.ApiKey))
+            if (backendConfiguration != null && !string.IsNullOrWhiteSpace(backendConfiguration.ApiKey))
             {
                 httpClient.DefaultRequestHeaders.Add("X-API-Key", backendConfiguration.ApiKey);
             }
